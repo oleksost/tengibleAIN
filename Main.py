@@ -1,4 +1,6 @@
 #!/usr/bin/python
+import Participant
+import Pump
 import time
 import json
 import datetime
@@ -20,7 +22,7 @@ util = rdr.util()
 ASSET_1 = 36
 ASSET_2 = 38
 ASSET_3 = 40
-ASSET_BROCKEN=40
+BREAK_ASSET=40
 OUT_manufacturer=11
 OUT_service=15
 OUT_operator=12
@@ -35,9 +37,6 @@ OUT_Pump_Plug_Service=7
 greating="Great choice! You just bought the Asset "
 pygame.display.init()                 
 
-GPIO.setup(OUT_manufacturer, GPIO.OUT)
-GPIO.setup(OUT_service, GPIO.OUT)
-GPIO.setup(OUT_operator, GPIO.OUT)
 GPIO.setup(OUT_Pump_Plug, GPIO.OUT)
 GPIO.setup(OUT_Pump_Plug_Service, GPIO.OUT)
 GPIO.setup(SERVICE_BULETTE, GPIO.OUT)
@@ -46,15 +45,23 @@ GPIO.setup(SERVICE_BULETTE_CUSTOMER, GPIO.OUT)
 GPIO.setup(ASSET_1, GPIO.IN)
 GPIO.setup(ASSET_2, GPIO.IN)
 GPIO.setup(ASSET_3, GPIO.IN)
-GPIO.setup(ASSET_BROCKEN, GPIO.IN)
+GPIO.setup(BREAK_ASSET, GPIO.IN)
 GPIO.setup(SERVICE_BULETTE_FABRIK, GPIO.IN)
 GPIO.setup(SERVICE_BULETTE_CUSTOMER_MEASURRE, GPIO.IN)
 
+#Pump_1=Pump.Pump(215, "Pump1", ASSET_1, False, None)
+#Pump_2=Pump.Pump(138, "Pump2", ASSET_2, False, None)
+
+
+manufacturer=Participant.Participant(OUT_manufacturer)
+service=Participant.Participant(OUT_service)
+operator=Participant.Participant(OUT_operator)
+
 def get_alife():
-     GPIO.output(OUT_manufacturer, GPIO.HIGH)
-     GPIO.output(OUT_service, GPIO.HIGH)
-     GPIO.output(OUT_operator, GPIO.HIGH)
-     show_img("1.PNG")
+     GPIO.output(manufacturer.OUT, GPIO.HIGH)
+     GPIO.output(service.OUT, GPIO.HIGH)
+     GPIO.output(operator.OUT, GPIO.HIGH)
+     show_img("img/1.PNG")
      time.sleep(2)
      GPIO.output(OUT_manufacturer, GPIO.LOW)
      GPIO.output(OUT_service, GPIO.LOW)
@@ -67,11 +74,11 @@ def show_img(img):
     screen.blit (imgSurf,(0,0))
     pygame.display.flip()
 
-def buy_pump(pump_id):
-     print greating + str(pump_id)
-     show_img("2.PNG")
+def buy_pump():
+     print greating + str(Asset.Name)
+     show_img("img/2.PNG")
      time.sleep(3)
-     show_img("3.PNG")
+     show_img("img/3.PNG")
      time.sleep(3)
      
 def buying_pump():
@@ -86,12 +93,12 @@ def buying_pump():
     asset_id =0
     while not isBought:
       readRFID()
-      if asset_id>0 and not isBought:
-        buy_pump(asset_id)
+      if Asset.RFID_Identifier>0 and not isBought:
+        buy_pump()
         q.put("Stop")
         p.terminate()
         isBought=True
-        show_img("1.PNG")
+        show_img("img/1.PNG")
 
 def activate_actor(actor,q, frequenz):
     
@@ -109,8 +116,7 @@ def breake():
      GPIO.output(OUT_Pump_Plug, GPIO.LOW)
 
 def readRFID():
- global Pump
- global asset_id 
+ global Asset
  global rdr
  global util
  rdr=RFID.RFID()
@@ -124,12 +130,10 @@ def readRFID():
     if not error:
          #print "UID: " + str(uid[1])
          if uid[1]==215:
-              Pump=ASSET_1
-              asset_id=1
+              Asset=Pump.Pump(uid[1], "Pump1", ASSET_1, False, None)
               break
          if uid[1]==138:
-              Pump=ASSET_2
-              asset_id=2
+              Asset=Pump.Pump(uid[1], "Pump2", ASSET_2, False, None)
               break
 
           
@@ -143,35 +147,21 @@ GPIO.output(OUT_Pump_Plug_Service, GPIO.HIGH)
 buying_pump()
 (error, tag_type) = rdr.request()
 
-def pump_working(q):
-     #wait 10 sek until next break
-      time.sleep(10)
-      q.put("Broeken")
-      
-def work():      
-     if __name__== '__main__':
-        global queue_Asset_Working
-        queue_Asset_Working=Queue()
-        pump_work=Process(target=pump_working, args=(queue_Asset_Working,))
-        pump_work.start()
+  
 def blink_service(gpio, queue, frequenz):
-    #global qu
-    #qu=Queue()
     pr=Process(target=activate_actor, args=(gpio,queue,frequenz))
     pr.start()
 
-# count how many loop rounds asset is not on the RFID reader in variable asset_on_RFID
+# count how many loop rounds asset is not on the RFID reader in variable asset_on_RFID  
 asset_on_RFID = 0
 bulletin_activation=0
 user_bulleting_deactivation=0
 
 #work()
-asset_broken = False
 finished_working=False
 bulette_fabrik_activated=False
 bulette_fabrik_removed=False
 user_informed_about_bulette=False
-
 bulette_in=False
 
 GPIO.output(SERVICE_BULETTE_CUSTOMER, GPIO.HIGH)
@@ -179,31 +169,18 @@ GPIO.output(SERVICE_BULETTE_CUSTOMER, GPIO.HIGH)
 
 #endless loop
 while True:
-    #print bulletin_activation
-    #print bulette_fabrik_activated
 
-
-    if GPIO.input(SERVICE_BULETTE_CUSTOMER_MEASURRE)==1 and not user_informed_about_bulette and not asset_broken:
+    if GPIO.input(SERVICE_BULETTE_CUSTOMER_MEASURRE)==1 and not user_informed_about_bulette and not Asset.Brocken:
          print "New data from Service Bulette"
          user_informed_about_bulette=True
          time.sleep(2)
          GPIO.output(SERVICE_BULETTE_CUSTOMER, GPIO.LOW)
          
 
-    if GPIO.input(SERVICE_BULETTE_CUSTOMER_MEASURRE)==0 and user_informed_about_bulette and not asset_broken:
+    if GPIO.input(SERVICE_BULETTE_CUSTOMER_MEASURRE)==0 and user_informed_about_bulette and not Asset.Brocken:
          #GPIO.output(SERVICE_BULETTE_CUSTOMER, GPIO.HIGH)
          user_informed_about_bulette=False
     
-
-
-    #if user_informed_about_bulette and user_bulleting_deactivation>0:
-     #    GPIO.output(SERVICE_BULETTE_CUSTOMER, GPIO.LOW)
-
-
-    #if GPIO.input(SERVICE_BULETTE_CUSTOMER_MEASURRE)==1:
-     #    user_bulleting_deactivation=user_bulleting_deactivation+1
-    
-
     
     #bulette_in=False
     a = datetime.datetime.now()
@@ -222,11 +199,11 @@ while True:
     else:
          bulette_in=False
      
-    if not asset_broken:
+    if not Asset.Brocken:
          (error, tag_type) = rdr.request()
 
     #if bulletin_activation>50 and GPIO.input(SERVICE_BULETTE_FABRIK)==0 and not bulette_fabrik_activated and not bulette_fabrik_removed and not asset_broken:
-    if bulletin_activation>10 and not bulette_in and not bulette_fabrik_activated and not bulette_fabrik_removed and not asset_broken:
+    if bulletin_activation>10 and not bulette_in and not bulette_fabrik_activated and not bulette_fabrik_removed and not Asset.Brocken:
          bulette_fabrik_activated=True
          bulette_in=True
          global queue_bulette
@@ -236,20 +213,20 @@ while True:
          #bulletin_activation=0
          
     #if bulletin_activation<=50 and GPIO.input(SERVICE_BULETTE_FABRIK)==0 and not asset_broken:
-    if bulletin_activation<=10 and not bulette_in and not asset_broken:
+    if bulletin_activation<=10 and not bulette_in and not Asset.Brocken:
          #print str(bulletin_activation)
          bulletin_activation=bulletin_activation+1
          
 
     #if bulette_fabrik_activated==True and GPIO.input(SERVICE_BULETTE_FABRIK)==0 and not bulette_fabrik_removed and not asset_broken:
-    if bulette_fabrik_activated==True and not bulette_in and not bulette_fabrik_removed and not asset_broken:
+    if bulette_fabrik_activated==True and not bulette_in and not bulette_fabrik_removed and not Asset.Brocken:
          #print "HAllo"
          bulette_fabrik_activated=False
          bulette_fabrik_removed=True
          GPIO.output(SERVICE_BULETTE_CUSTOMER, GPIO.HIGH)
 
     #if bulette_fabrik_activated==False and GPIO.input(SERVICE_BULETTE_FABRIK)==1 and bulette_fabrik_removed and not asset_broken:
-    if bulette_fabrik_activated==False and bulette_in and bulette_fabrik_removed and not asset_broken:
+    if bulette_fabrik_activated==False and bulette_in and bulette_fabrik_removed and not Asset.Brocken:
          queue_bulette.put("Stop")
          bulette_in=False
          #GPIO.output(SERVICE_BULETTE, GPIO.LOW)
@@ -259,12 +236,12 @@ while True:
 
          
     #increase the round number only if the asset is not on the RFID reader several loop round in sequence (due to the RFID signal instability)
-    if error and not asset_broken:
+    if error and not Asset.Brocken:
          asset_on_RFID=asset_on_RFID+1
     else:
          asset_on_RFID=0
 
-    if GPIO.input(ASSET_BROCKEN)==1:
+    if GPIO.input(BREAK_ASSET)==1:
          finished_working=True
      
     #if not queue_Asset_Working.empty():
@@ -279,23 +256,21 @@ while True:
         finished_working=False
         #work()
 
-    if not asset_broken and finished_working:
+    if not Asset.Brocken and finished_working:
          print "Asset is broken"
-         asset_broken=True
+         Asset.Brocken=True
          print "Repare the Asset!"
          asset_on_RFID=0
          #global qu
-         qu=Queue()
-         blink_service(OUT_service, qu, 0.5)
+         #qu=Queue()
+         service.blink_service(0.5)
          finished_working=False
          
-    if asset_broken:
-          if GPIO.input(Pump)==1:
-               asset_broken=False
+    if Asset.Brocken:
+          if GPIO.input(Asset.GPIO_to_repair)==1:
+               Asset.Brocken=False
                asset_on_RFID=0
-               qu.put("Stop")
-               #pr.terminate()
-               #quequeue_Asset_Workingue=Queue()
+               service.stop_blink_service()
                print "Congratulations, you repaired the Asset!"
                finished_working=False
                #work()
