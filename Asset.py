@@ -7,4 +7,5 @@ class Asset(object):
         self.Name=name
         self.GPIO_to_repair=gpio_in_to_repair
         self.Brocken=brocken
+        GPIO.setup(gpio_in_to_repair, GPIO.IN)
 
