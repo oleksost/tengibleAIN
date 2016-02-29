@@ -19,8 +19,6 @@ import signal
 # RPi.GPIO Layout verwenden (wie Pin-Nummern)
 GPIO.setmode(GPIO.BOARD)
 
-ASSET_UPDATE_FREQUENCY_OVER_SB=10
-BREAK_ASSET=40
 OUT_manufacturer=11
 OUT_service=15
 OUT_operator=12
@@ -107,7 +105,8 @@ while True:
          Manufacturer.deactivate_Bulette()
          bulette_in=False
          Manufacturer.Bulette_at_campus=True
-    
+         
+    #checking if the received the update from the Bulette 
     if GPIO.input(Operator.service_b_measure)==1 and not Operator.Imformed_about_recent_update and not Operator.Asset.Brocken:
          print "New data from Service Bulette"
          Operator.Imformed_about_recent_update=True
