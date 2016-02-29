@@ -5,7 +5,7 @@ import pygame
 import RFID
 import Pump
 
-class Participant:
+class Participant(object):
     """
     class for the participants
     """
@@ -27,25 +27,16 @@ class Participant:
      
 
 
-    def blink_service(self,frequenz):
-        global qu
-        qu=Queue()
-        pr=Process(target=self.activate_actor, args=(self.OUT,qu,frequenz))
-        pr.start()
-        
-    def stop_blink_service(self):
-          qu.put("Stop")
-
+ 
     def buy_asset(self):
-       #if __name__== '__main__':
-       self.blink_service(0.5)
+       blinker_Queue=Participant.blink_service(self.OUT,0.5)
        print "Operator: I need to buy a new pump!"
        self.Asset=Participant.readRFID()
        self.Has_asset=True
        self.Asset_is_working=True 
        self.asset_not_on_RFID=0
        Participant.asset_bough(self.Asset)
-       self.stop_blink_service()
+       Participant.stop_blink_service(blinker_Queue)
        Participant.show_img("img/1.PNG")
       
     def check_asset(self):
@@ -59,8 +50,20 @@ class Participant:
            self.Has_asset=False
            self.Asset_is_working=False
            
+
+
     
-       
+    @staticmethod
+    def blink_service(out, frequenz):
+        qu=Queue()
+        pr=Process(target=Participant.activate_actor, args=(out,qu,frequenz))
+        pr.start()
+        return qu
+        
+    @staticmethod
+    def stop_blink_service(qu):
+          qu.put("Stop")
+          
     @staticmethod
     def activate_actor(gpio, q, frequenz):
         while q.empty():
