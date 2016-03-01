@@ -2,6 +2,7 @@
 from Participant import Participant
 from Bulette import Bulette
 from Operator import Operator
+from Service import Service
 from Manufacturer import Manufacturer
 import Pump
 import time
@@ -22,6 +23,7 @@ GPIO.setmode(GPIO.BOARD)
 OUT_manufacturer=11
 OUT_service=15
 OUT_operator=12
+BREAK_ASSET=40
 SERVICE_BULETTE_FABRIK=31
 SERVICE_BULETTE_FABRIK_MEASURE=33
 SERVICE_BULETTE_CUSTOMER=16
@@ -32,31 +34,23 @@ pygame.display.init()
 
 GPIO.setup(BREAK_ASSET, GPIO.IN)
 
-Manufacturer=Manufacturer	(OUT_manufacturer, SERVICE_BULETTE_FABRIK, SERVICE_BULETTE_FABRIK_MEASURE, bulette=Bulette())
-Service=Participant(OUT_service)
+Manufacturer=Manufacturer(OUT_manufacturer, SERVICE_BULETTE_FABRIK, SERVICE_BULETTE_FABRIK_MEASURE, bulette=Bulette())
+Service=Service(OUT_service)
 Operator=Operator(OUT_operator,SERVICE_BULETTE_CUSTOMER,SERVICE_BULETTE_CUSTOMER_MEASURRE)
 
 def get_alife():
-     GPIO.output(Manufacturer.OUT, GPIO.HIGH)
-     GPIO.output(Service.OUT, GPIO.HIGH)
-     GPIO.output(Operator.OUT, GPIO.HIGH)
+     GPIO.output(Manufacturer.GPIO_out, GPIO.HIGH)
+     GPIO.output(Service.GPIO_out, GPIO.HIGH)
+     GPIO.output(Operator.GPIO_out, GPIO.HIGH)
      Participant.show_img("img/1.PNG")
      time.sleep(2)
-     GPIO.output(Manufacturer.OUT, GPIO.LOW)
-     GPIO.output(Service.OUT, GPIO.LOW)
-     GPIO.output(Operator.OUT, GPIO.LOW)
+     GPIO.output(Manufacturer.GPIO_out, GPIO.LOW)
+     GPIO.output(Service.GPIO_out, GPIO.LOW)
+     GPIO.output(Operator.GPIO_out, GPIO.LOW)
 
  #Calls GPIO cleanup
  #rdr.cleanup()  
-          
-get_alife()
-time.sleep(3)
-
-#protection for multiprocessing, only for Windows
-if __name__== '__main__':
-     Operator.buy_asset()
-     Manufacturer.set_next_asset_update_time(Operator.Asset)
-     
+             
 def ckeck_if_info_bulette_in_place(GPIO_place):
    
     a = datetime.datetime.now()
@@ -75,22 +69,28 @@ def ckeck_if_info_bulette_in_place(GPIO_place):
     else:
          bulette_in=False
     return bulette_in
-
+    
+get_alife()
+#time.sleep(3)
+#protection for multiprocessing, only for Windows
+if __name__== '__main__':
+     Operator.buy_asset(Manufacturer)
+     
 # count how many loop rounds asset is not on the RFID reader in variable asset_not_on_RFID  
 asset_not_on_RFID = 0
 bulletin_activation=0
 
-GPIO.output(Operator.service_b_out, GPIO.HIGH)
+GPIO.output(Operator.Service_Bulette_GPIO_out, GPIO.HIGH)
 
 #endless loop
 while True:
 
     #check if Info Bulette is plugged in the manufacturer, false by default and if not activated  
-    bulette_in=ckeck_if_info_bulette_in_place(Manufacturer.service_b_measure)
+    bulette_in=ckeck_if_info_bulette_in_place(Manufacturer.Service_Bulette_GPIO_Measure)
     
     #checking if the Asset is on the RFID reader
     Operator.check_asset()
-
+    
     if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulette_in and not Manufacturer.Bulette.Activated and Manufacturer.Bulette_at_campus and not Operator.Asset.Brocken:
          Manufacturer.Bulette.Activated=True
          bulette_in=True
@@ -99,7 +99,7 @@ while True:
     if Manufacturer.Bulette.Activated and not bulette_in and Manufacturer.Bulette_at_campus and not Operator.Asset.Brocken:
          Manufacturer.Bulette.Activated=False
          Manufacturer.Bulette_at_campus=False
-         GPIO.output(Operator.service_b_out, GPIO.HIGH)  
+         GPIO.output(Operator.Service_Bulette_GPIO_out, GPIO.HIGH)  
 
     if not Manufacturer.Bulette.Activated and bulette_in and not Manufacturer.Bulette_at_campus and not Operator.Asset.Brocken:
          Manufacturer.deactivate_Bulette()
@@ -107,15 +107,15 @@ while True:
          Manufacturer.Bulette_at_campus=True
          
     #checking if the received the update from the Bulette 
-    if GPIO.input(Operator.service_b_measure)==1 and not Operator.Imformed_about_recent_update and not Operator.Asset.Brocken:
+    if GPIO.input(Operator.Service_Bulette_GPIO_Measure)==1 and not Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
          print "New data from Service Bulette"
-         Operator.Imformed_about_recent_update=True
-         Manufacturer.set_next_asset_update_time(Operator.Asset)
+         Operator.Informed_about_recent_update=True
+         Manufacturer.set_next_asset_update_time()
          time.sleep(2)
-         GPIO.output(Operator.service_b_out, GPIO.LOW)       
+         GPIO.output(Operator.Service_Bulette_GPIO_out, GPIO.LOW)       
 
-    if GPIO.input(Operator.service_b_measure)==0 and Operator.Imformed_about_recent_update and not Operator.Asset.Brocken:
-         Operator.Imformed_about_recent_update=False
+    if GPIO.input(Operator.Service_Bulette_GPIO_Measure)==0 and Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
+         Operator.Informed_about_recent_update=False
          
     #manually break the asset
     if GPIO.input(BREAK_ASSET)==1:
@@ -125,10 +125,8 @@ while True:
         print "No Asset"
         #Protection for multiprocessing, only for Windows
         if __name__== '__main__':
-           Operator.buy_asset()
-           Manufacturer.set_next_asset_update_time(Operator.Asset)
-        #update the time for the next random break
-        Operator.Asset.set_next_break()   
+           Operator.buy_asset(Manufacturer)
+           #Operator.Asset.set_next_break()   
 
     if not Operator.Asset.Brocken and not Operator.Asset_is_working:
          print "Asset is broken"
@@ -137,17 +135,10 @@ while True:
          print "Please, repare the Asset!"
      
          if __name__== '__main__':
-           blinker_Queue=Service.blink_service(Service.OUT,0.5)
+           blinker_Queue=Service.blink_service(Service.GPIO_out,0.5)
          
-    if Operator.Asset.Brocken:
-          if GPIO.input(Operator.Asset.GPIO_to_repair)==1:
-               Operator.Asset.Brocken=False
-               Operator.asset_not_on_RFID=0
-               Service.stop_blink_service(blinker_Queue)
-               print "Congratulations, you repaired the Asset!"
-               Operator.Asset_is_working=True
-               #update the time for the next random break
-               Operator.Asset.set_next_break()    
+    if Operator.Asset.Brocken and GPIO.input(Operator.Asset.GPIO_to_repair)==1:
+               Service.repare_Asset(Operator,blinker_Queue)   
                
      #random asset break
     if datetime.datetime.now()>Operator.Asset.Next_Break and Operator.Asset_is_working and not Operator.Asset.Brocken:

@@ -3,10 +3,11 @@ from Asset import Asset
 import RFID
 
 class Pump(Asset):
-      def __init__(self, rfid_identifier, name, gpio_in_to_repair, brocken, img):
-        super(Pump, self).__init__(rfid_identifier, name, gpio_in_to_repair, brocken)
+      def __init__(self, rfid_identifier=None, gpio_in_to_repair=None, brocken=False, price=0, img=None, type="Unknown Pump", model="Unknown Model"):
+        super(Pump, self).__init__(rfid_identifier, gpio_in_to_repair, brocken, price)
         self.IMG=img
-      
+        self.Model=model  
+        self.Type=type
       
      
       """
