@@ -20,11 +20,11 @@ class Manufacturer(Participant):
         }
         
         
-      def activate_Bulletin(self):
+      def activate_bulletin(self):
         self.Bulletin.Activated=True
         self.blinker_Queue=Participant.blink_service(self.Service_Bulletin_GPIO_out, 0.3)
         
-      def deactivate_Bulletin(self):
+      def deactivate_bulletin(self):
         self.Bulletin.Activated=False
         Participant.stop_blink_service(self.blinker_Queue)
         self.set_next_asset_update_time()

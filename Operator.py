@@ -6,7 +6,7 @@ class Operator(Participant):
      def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, has_asset=False, asset=None, asset_works=False, on_RFID=0, informed_about_recent_update=False):
         super(Operator, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure)
         self.Informed_about_recent_update=informed_about_recent_update
-        self.asset_not_on_RFID=on_RFID 
+        self.Asset_not_on_RFID=on_RFID
         self.Has_asset=has_asset
         self.Asset=asset
         self.Asset_is_working=asset_works 
@@ -18,7 +18,7 @@ class Operator(Participant):
         self.Asset=Operator.readRFID(self,manufacturer.Catalog)
         manufacturer.set_next_asset_update_time()
         self.Asset_is_working=True 
-        self.asset_not_on_RFID=0
+        self.Asset_not_on_RFID=0
         self.Asset.set_next_break()
         
         Participant.asset_bough(self.Asset)
@@ -28,11 +28,11 @@ class Operator(Participant):
      def check_asset(self):
        (error, tag_type) = rdr.request()
        if error and not self.Asset.Brocken:
-           self.asset_not_on_RFID += 1
+           self.Asset_not_on_RFID += 1
        else:
-           self.asset_not_on_RFID=0
+           self.Asset_not_on_RFID=0
        
-       if self.asset_not_on_RFID>2 and self.Has_asset:
+       if self.Asset_not_on_RFID>2 and self.Has_asset:
            self.Has_asset=False
            self.Asset_is_working=False
            

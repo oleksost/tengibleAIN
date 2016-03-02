@@ -76,8 +76,6 @@ get_alife()
 if __name__== '__main__':
      Operator.buy_asset(Manufacturer)
      
-# count how many loop rounds asset is not on the RFID reader in variable asset_not_on_RFID  
-asset_not_on_RFID = 0
 bulletin_activation=0
 
 GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
@@ -94,7 +92,7 @@ while True:
     if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulletin_in and not Manufacturer.Bulletin.Activated and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
          Manufacturer.Bulletin.Activated=True
          bulletin_in=True
-         Manufacturer.activate_Bulletin()
+         Manufacturer.activate_bulletin()
          
     if Manufacturer.Bulletin.Activated and not bulletin_in and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
          Manufacturer.Bulletin.Activated=False
@@ -102,18 +100,14 @@ while True:
          GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)  
 
     if not Manufacturer.Bulletin.Activated and bulletin_in and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-         Manufacturer.deactivate_Bulletin()
+         Manufacturer.deactivate_bulletin()
          bulletin_in=False
          Manufacturer.Bulletin_at_campus=True
          
     #checking if the received the update from the Bulletin 
     if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==1 and not Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
          Manufacturer.inform_operator_about_Update(Operator)
-         #print "New data from Service Bulletin"
-         #Operator.Informed_about_recent_update=True
-         #Manufacturer.set_next_asset_update_time()
-         #time.sleep(2)
-         #GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.LOW)       
+
 
     if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
          Operator.Informed_about_recent_update=False
@@ -132,12 +126,13 @@ while True:
     if not Operator.Asset.Brocken and not Operator.Asset_is_working:
          print "Asset is broken"
          Operator.Asset.Brocken=True
-         Operator.asset_not_on_RFID=0
+         Operator.Asset_not_on_RFID=0
          print "Please, repare the Asset!"
      
          if __name__== '__main__':
            blinker_Queue=Service.blink_service(Service.GPIO_out,0.5)
-         
+
+    #check for the status on the repair GPIO of the asset, if a magnet is on the senscor, the GPIO_to_repair of the asset is 0
     if Operator.Asset.Brocken and GPIO.input(Operator.Asset.GPIO_to_repair)==0:
                Service.repare_Asset(Operator,blinker_Queue)   
                
