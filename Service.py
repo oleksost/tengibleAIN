@@ -1,8 +1,8 @@
 from Participant import Participant
 
 class Service(Participant):
-     def __init__(self, gpio_out, service_bulleten_out=None, service_bullete_measure=None):
-        super(Service, self).__init__(gpio_out, service_bulleten_out, service_bullete_measure)
+     def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None):
+        super(Service, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure)
     
      def repare_Asset(self, operator, blinker_Queue):
         operator.Asset.Brocken=False

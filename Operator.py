@@ -3,8 +3,8 @@ import Pump
 import RFID
 
 class Operator(Participant):
-     def __init__(self, gpio_out, service_bulleten_out=None, service_bullete_measure=None, has_asset=False, asset=None, asset_works=False, on_RFID=0, informed_about_recent_update=False):
-        super(Operator, self).__init__(gpio_out, service_bulleten_out, service_bullete_measure)
+     def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, has_asset=False, asset=None, asset_works=False, on_RFID=0, informed_about_recent_update=False):
+        super(Operator, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure)
         self.Informed_about_recent_update=informed_about_recent_update
         self.asset_not_on_RFID=on_RFID 
         self.Has_asset=has_asset

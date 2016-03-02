@@ -10,13 +10,13 @@ class Participant(object):
     class for the participants
     """
     
-    def __init__(self, gpio_out, service_bulleten_out=None, service_bullete_measure=None):
+    def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None):
         self.GPIO_out = gpio_out
-        self.Service_Bulette_GPIO_out = service_bulleten_out
-        self.Service_Bulette_GPIO_Measure = service_bullete_measure
+        self.Service_Bulletin_GPIO_out = service_bulletin_out
+        self.Service_Bulletin_GPIO_Measure = service_bullete_measure
         GPIO.setup(gpio_out, GPIO.OUT)
-        if not service_bulleten_out==None and not service_bullete_measure== None:
-          GPIO.setup(service_bulleten_out, GPIO.OUT)
+        if not service_bulletin_out==None and not service_bullete_measure== None:
+          GPIO.setup(service_bulletin_out, GPIO.OUT)
           GPIO.setup(service_bullete_measure, GPIO.IN)
      
  
