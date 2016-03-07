@@ -7,7 +7,7 @@ class Service(Participant):
      def repare_Asset(self, operator, blinker_Queue):
         operator.Asset.Brocken=False
         self.stop_blink_service(blinker_Queue)
-        print "Congratulations, you repaired the Asset!"
+        Participant.speak("Service", "Congratulations, you repaired the Asset!")
         operator.Asset_is_working=True
         #update the time for the next random break
         operator.Asset.set_next_break()    

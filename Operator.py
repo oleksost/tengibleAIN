@@ -2,6 +2,7 @@ from Participant import Participant
 import Pump
 import RFID
 
+
 class Operator(Participant):
      def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, has_asset=False, asset=None, asset_works=False, on_RFID=0, informed_about_recent_update=False):
         super(Operator, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure)
@@ -13,7 +14,8 @@ class Operator(Participant):
         
      def buy_asset(self, manufacturer):
         blinker_Queue=Participant.blink_service(self.GPIO_out,0.5)
-        print "Operator: I need to buy a new pump!"
+        Participant.speak("Operator", "I need to buy a new pump!")
+        #print "Operator: I need to buy a new pump!"
         #while not self.Has_asset:
         self.Asset=Operator.readRFID(self,manufacturer.Catalog)
         manufacturer.set_next_asset_update_time()
@@ -23,7 +25,7 @@ class Operator(Participant):
         
         Participant.asset_bough(self.Asset)
         Participant.stop_blink_service(blinker_Queue)
-        Participant.show_img("img/1.PNG")
+        #Participant.show_img("img/1.PNG")
        
      def check_asset(self):
        (error, tag_type) = rdr.request()

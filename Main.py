@@ -1,4 +1,15 @@
 #!/usr/bin/python
+import tornado.httpserver
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import tornado.gen
+from tornado.options import define, options
+import multiprocessing
+import threading
+#from Webserver import MainHandler
+from Webserver import WebSocketHandler
+
 from Participant import Participant
 from Bulletin import Bulletin
 from Operator import Operator
@@ -17,6 +28,7 @@ from random import randint
 import RFID
 import signal
 
+
 # RPi.GPIO Layout verwenden (wie Pin-Nummern)
 GPIO.setmode(GPIO.BOARD)
 
@@ -32,17 +44,12 @@ SERVICE_BULETTE_CUSTOMER_MEASURRE=18
 greating="Great choice! You just bought the Asset "
 pygame.display.init()                 
 
-GPIO.setup(BREAK_ASSET, GPIO.IN)
-
-Manufacturer=Manufacturer(OUT_manufacturer, SERVICE_BULETTE_FABRIK, SERVICE_BULETTE_FABRIK_MEASURE, bulletin=Bulletin())
-Service=Service(OUT_service)
-Operator=Operator(OUT_operator,SERVICE_BULETTE_CUSTOMER,SERVICE_BULETTE_CUSTOMER_MEASURRE)
 
 def get_alife():
      GPIO.output(Manufacturer.GPIO_out, GPIO.HIGH)
      GPIO.output(Service.GPIO_out, GPIO.HIGH)
      GPIO.output(Operator.GPIO_out, GPIO.HIGH)
-     Participant.show_img("img/1.PNG")
+     #Participant.show_img("img/1.PNG")
      time.sleep(2)
      GPIO.output(Manufacturer.GPIO_out, GPIO.LOW)
      GPIO.output(Service.GPIO_out, GPIO.LOW)
@@ -69,20 +76,48 @@ def ckeck_if_info_bulletin_in_place(GPIO_place):
     else:
          bulletin_in=False
     return bulletin_in
-    
-get_alife()
-#time.sleep(3)
-#protection for multiprocessing, only for Windows
-if __name__== '__main__':
-     Operator.buy_asset(Manufacturer)
-     
-bulletin_activation=0
 
-GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
+def running_page():
+      templateData = {
+      'participant' : "Running",
+      'Message': ""
+       }
+      return render_template('running.html', **templateData)
+   
+def speak_start():
+      templateData = {
+      'participant' : "Welcome",
+      'Message': ""
+       }
+      return render_template('index.html', **templateData)
+      
 
-#endless loop
-while True:
+def main():
+  #running_page()
+  GPIO.setup(BREAK_ASSET, GPIO.IN)
 
+  global Manufacturer
+  global Service
+  global Operator
+  Manufacturer=Manufacturer(OUT_manufacturer, SERVICE_BULETTE_FABRIK, SERVICE_BULETTE_FABRIK_MEASURE, bulletin=Bulletin())
+  Service=Service(OUT_service)
+  Operator=Operator(OUT_operator,SERVICE_BULETTE_CUSTOMER,SERVICE_BULETTE_CUSTOMER_MEASURRE)
+
+  
+  #speak_start()
+  get_alife()
+  #time.sleep(3)
+  #protection for multiprocessing, only for Windows
+  WebSocketHandler.send_updates("Hello, I am working")
+  Operator.buy_asset(Manufacturer)
+      
+  bulletin_activation=0
+
+  GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
+
+  #endless loop
+  while True:
+  
     #check if Info Bulletin is plugged in the manufacturer, false by default and if not activated  
     bulletin_in=ckeck_if_info_bulletin_in_place(Manufacturer.Service_Bulletin_GPIO_Measure)
     
@@ -117,20 +152,17 @@ while True:
          Operator.Asset_is_working=False
        
     if not Operator.Has_asset:
-        print "No Asset"
-        #Protection for multiprocessing, only for Windows
-        if __name__== '__main__':
-           Operator.buy_asset(Manufacturer)
-           #Operator.Asset.set_next_break()   
+             #print "No Asset"
+             #Protection for multiprocessing, only for Windows
+             Operator.buy_asset(Manufacturer)
+             #Operator.Asset.set_next_break()   
 
     if not Operator.Asset.Brocken and not Operator.Asset_is_working:
-         print "Asset is broken"
+         WebSocketHandler.send_updates("Asset is broken")
          Operator.Asset.Brocken=True
          Operator.Asset_not_on_RFID=0
-         print "Please, repare the Asset!"
-     
-         if __name__== '__main__':
-           blinker_Queue=Service.blink_service(Service.GPIO_out,0.5)
+         WebSocketHandler.send_updates("Please, repare the Asset!")
+         blinker_Queue=Service.blink_service(Service.GPIO_out,0.5)
 
     #check for the status on the repair GPIO of the asset, if a magnet is on the senscor, the GPIO_to_repair of the asset is 0
     if Operator.Asset.Brocken and GPIO.input(Operator.Asset.GPIO_to_repair)==0:
@@ -139,5 +171,28 @@ while True:
      #random asset break
     if datetime.datetime.now()>Operator.Asset.Next_Break and Operator.Asset_is_working and not Operator.Asset.Brocken:
         Operator.Asset_is_working=False
+
+class MainHandler(tornado.web.RequestHandler):
+	@tornado.web.asynchronous
+	def get(self):
+		self.render("index.html")
+		threading.Thread(target=main).start()
+
+	def post(self):
+		self.render("index.html")  
+     
+application = tornado.web.Application([
+	(r"/", MainHandler),
+	#(r'/static/(.*)', tornado.web.StaticFileHandler, {'path': '~/yourdir/static'}),
+	#(r"/(favicon\.ico)", tornado.web.StaticFileHandler, {'path': '~/yourdir/static'}),
+	#(r"/(apple-touch-icon\.png)", tornado.web.StaticFileHandler, {'path': '~/yourdir/static'}),
+	#(r"/(apple-touch-icon-precomposed\.png)", tornado.web.StaticFileHandler, {'path': '~/yourdir/static'}),
+	(r"/websocket", WebSocketHandler),
+])      
         
-    
+if __name__ == "__main__":
+    #comSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    #app.run(host='0.0.0.0', debug=True)
+	http_server = tornado.httpserver.HTTPServer(application)
+	http_server.listen(5000)
+	tornado.ioloop.IOLoop.instance().start()

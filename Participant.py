@@ -4,6 +4,8 @@ from multiprocessing import Process, Queue
 import pygame
 import RFID
 import Pump
+from flask import Flask, render_template
+from Webserver import WebSocketHandler
 
 class Participant(object):
     """
@@ -18,8 +20,10 @@ class Participant(object):
         if not service_bulletin_out==None and not service_bullete_measure== None:
           GPIO.setup(service_bulletin_out, GPIO.OUT)
           GPIO.setup(service_bullete_measure, GPIO.IN)
-     
- 
+    @classmethod
+    def speak(cls, participant, message):
+        WebSocketHandler.send_updates(participant+": "+message)
+    
     @staticmethod
     def blink_service(out, frequenz):
         qu=Queue()
@@ -46,11 +50,11 @@ class Participant(object):
     @staticmethod
     def asset_bough(asset):
           greating="Great choice! You just bought the Asset "
-          print greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price)
-          Participant.show_img("img/2.PNG")
-          time.sleep(3)
-          Participant.show_img("img/3.PNG")
-          time.sleep(3)
+          WebSocketHandler.send_updates(greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price))
+          #Participant.show_img("img/2.PNG")
+          time.sleep(1)
+          #Participant.show_img("img/3.PNG")
+          #time.sleep(1)
 
        
     @staticmethod

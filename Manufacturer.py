@@ -3,6 +3,7 @@ from Bulletin import Bulletin
 import datetime
 import time
 import RPi.GPIO as GPIO
+from Webserver import WebSocketHandler
 
 class Manufacturer(Participant):
       """
@@ -33,7 +34,7 @@ class Manufacturer(Participant):
          self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=10)
          
       def inform_operator_about_Update(self, operator):
-         print "New data from Service Bulletin"
+         WebSocketHandler.send_updates("New data from Service Bulletin")
          operator.Informed_about_recent_update=True
          self.set_next_asset_update_time()
          time.sleep(2)
