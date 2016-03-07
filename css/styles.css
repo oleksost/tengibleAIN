@@ -1,0 +1,113 @@
+html, body{
+	 font-family: 'BentonSans', Verdana, 'Lucida Sans Unicode', sans-serif;
+	 color: #333333;
+}
+
+
+
+
+
+#container_main{
+	width: 40%;
+	height: 100%;
+	min-height: 30rem;
+	position: absolute;
+	top: 0rem;
+	left: 0rem;
+}
+
+
+
+
+
+#container_marketing{
+	width: 100%;
+	height: 60%;
+	min-height: 10rem;
+	position: absolute;
+	top:0rem;
+	overflow: auto;
+
+}
+
+
+#marketing_text{
+	max-width: 40rem;
+	line-height: 150%;
+}
+
+
+#container_virtual_twin{
+	width: 100%;
+	height: 40%;
+	min-height: 10rem;
+	position: absolute;
+	bottom: 0rem;
+	overflow: hidden;
+
+}
+
+#container_twin_image{
+	max-width: 100%;
+	max-height: 80%;
+	overflow: hidden;
+	text-align: center;
+}
+
+
+#container_iframe{
+	width: 60%;
+	height: 100%;
+	position: absolute;
+	right: 0rem;
+	border-left: 1px solid #666666;
+}
+
+
+#container_instructions{
+	position: absolute;
+	bottom: 0rem;
+	left: 50%;
+	width: 30rem;
+	height: 20rem;
+	border: dashed 1px #CCCCCC;
+	background-image: url('../img/persona1.png');
+	background-repeat: no-repeat;
+	background-position: bottom left;
+	z-index: 90;
+}
+
+#container_speach{
+	position: absolute;
+	top:0;
+	right: 0;
+	width: 20rem;
+	height: 10rem;
+	opacity: .9;
+	padding: 2rem;
+	border: dashed 1px #CCCCCC;
+	background-image: url('../img/speachbubble.png');
+	background-repeat: no-repeat;
+	
+
+}
+
+
+.label{
+	font-weight: bold;
+	margin-left: 1rem;
+}
+
+
+.headline{
+	font-size: 2rem;
+	border-bottom: 1px solid #666666;
+	margin: 1rem;
+	margin-bottom: 1rem;
+	margin-top: 3rem;
+
+}
+
+#marketing_text{
+	margin: 1rem;
+}

@@ -1,44 +1,80 @@
+<!doctype html>
+
+<html lang="en">
 <head>
-   <title>Countdown to 20</title>
-   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-   <script type="text/javascript" src="/static/jquery-2.0.3.min.js"></script>
-   <script type="text/javascript">
-      jQuery(document).ready(function () {
-         var audioON = 1
-         if ("WebSocket" in window){
-            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
-            var messagecount = 0
-            ws.onmessage = function(evt) {
-               messagecount += 1;
-               jQuery(".hold").attr('id','pieSlice' + evt.data);
-               jQuery("#pieNumber").html(evt.data);
-            }
-            ws.onopen = function() {
-               messagecount = 0;
-            }
-            ws.onclose = function() {
-               messagecount = 0;
-            }
-         }
-         else {
-            alert("WebSocket NOT support by your Browser!");
-         }
-       
-      });
-   </script>
+  <meta charset="utf-8">
+
+  <title>Tangible AIN</title>
+  <meta name="description" content="Interface to showcase the SAP Asset Intelligence Network">
+  <meta name="author" content="Thomas Schoerner">
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/styles.css?v=1.0">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
 </head>
-<html>
-   <body>
-      <div id="wrapper">
-         <h1>AIN</h1>
-         <div class="pieContainer">
-            <div class="pieBackground"></div>
-            <div id="pieSlice20" class="hold">
-               <div class="pie pie1"></div>
-               <div class="pie pie2"></div>
-            </div>
-            <div id="pieNumber">:(</div>
-         </div>
-      </div>
-   </body>
+
+<body>
+
+
+<div id='container_main'>
+    <div id='container_marketing'>
+        <div id='marketing_headline' class='headline'>
+            Installation of a new Asset
+        </div>
+        <div id='marketing_text'>
+            AIN is really great because the installation of new assets is really simple. You just connect your device to the network and all the necessary data is directly pulled from the manufacturer. No more need for updates and no more fear of using outdated software. With AIN you are always on the safe side!
+        </div>
+    </div>
+    <div id='container_virtual_twin'>
+        <div class='headline'>
+            Digital Twin
+        </div>
+        <div>
+        <span class='label'>Equipment:&nbsp;</span>
+        <span id='twin_id'>
+            PP-1234 XZ
+        </span>
+          </div>
+        <div>
+        <span class='label'>Model:&nbsp;</span>
+        <span id='twin_model'>
+            Seawater Pump
+        </span>
+        </div>
+        <div>
+            <span class='label'>Status:&nbsp;</span>
+            <span id='twin_status'>
+                operating
+            </span>
+        </div>
+
+        <!-- image -->
+        <div id='container_twin_image'>
+            <img id='asset_image' src='img/asset1.gif' alt='rotating image of the asset' style="max-width:100%;max-height:100%;">
+        </div>
+
+    </div>
+</div>
+
+
+<div id='container_iframe'>
+    <iframe id='ain' src='https://www.sapfioritrial.com/' height='100%' width='100%'></iframe>
+
+</div>
+
+<div id='container_instructions'>
+    
+    <div id='container_speach'>
+        move the service truck to the factory
+    </div>
+</div>
+
+
+</body>
+  <script src="js/jquery1-12-1.js"></script>
+ <script src="js/edit_texts_here.js"></script>
+  <script src="js/script.js"></script>
 </html>
