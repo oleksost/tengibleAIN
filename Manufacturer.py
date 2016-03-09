@@ -21,9 +21,9 @@ class Manufacturer(Participant):
         }
         
         
-      def activate_bulletin(self):
+      def activate_bulletin(self, main_gueue):
         self.Bulletin.Activated=True
-        self.blinker_Queue=Participant.blink_service(self.Service_Bulletin_GPIO_out, 0.3)
+        self.blinker_Queue=Participant.blink_service(self.Service_Bulletin_GPIO_out, 0.3, main_gueue)
         
       def deactivate_bulletin(self):
         self.Bulletin.Activated=False
@@ -34,7 +34,8 @@ class Manufacturer(Participant):
          self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=10)
          
       def inform_operator_about_Update(self, operator):
-         WebSocketHandler.send_updates("New data from Service Bulletin")
+         Participant.update_event(4)
+         #WebSocketHandler.send_updates("New data from Service Bulletin")
          operator.Informed_about_recent_update=True
          self.set_next_asset_update_time()
          time.sleep(2)

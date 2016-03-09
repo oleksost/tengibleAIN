@@ -21,6 +21,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
  
 	def on_close(self):
 		WebSocketHandler.waiters.remove(self)
+	
+	def on_message(self, message):
+	    print "received message: %s\n" + message
+	    self.write_message(message + ' OK')
+	    
  
 	@classmethod
 	def send_updates(cls, index):
@@ -29,3 +34,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 				waiter.write_message(index)
 			except:
 				print("Error sending message")
+				
+				
+
+class MainHandler(tornado.web.RequestHandler):
+	@tornado.web.asynchronous
+	def get(self):
+		self.render("index.html")
+		
+	def post(self):
+		self.render("index.html")  

@@ -5,11 +5,12 @@ import RFID
 class Pump(Asset):
       def __init__(self, rfid_identifier=None, gpio_in_to_repair=None, brocken=False, price=0, img=None, type="Unknown Pump", model="Unknown Model"):
         super(Pump, self).__init__(rfid_identifier, gpio_in_to_repair, brocken, price)
+        self.Pimped=False
         self.IMG=img
         self.Model=model  
         self.Type=type
-      
-     
+        
+             
       """
       def pump_working(self, q):
         #wait 10 sek until next break

@@ -7,10 +7,9 @@
   <title>Tangible AIN</title>
   <meta name="description" content="Interface to showcase the SAP Asset Intelligence Network">
   <meta name="author" content="Thomas Schoerner">
-
-  <link rel="stylesheet" href="css/reset.css">
-  <link rel="stylesheet" href="css/styles.css?v=1.0">
-
+  <link rel="stylesheet" href="static/css/reset.css">
+  <link rel="stylesheet" href="static/css/styles.css?v=1.0">
+  
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
@@ -21,7 +20,9 @@
 
 <div id='container_main'>
     <div id='container_marketing'>
-        <div id='marketing_headline' class='headline'>
+    <div type="button" id="button_start">Start demo</div>
+    <div type="button" id="button_stop">Stop demo</div>
+           <div id='marketing_headline' class='headline'>
             Installation of a new Asset
         </div>
         <div id='marketing_text'>
@@ -53,7 +54,7 @@
 
         <!-- image -->
         <div id='container_twin_image'>
-            <img id='asset_image' src='img/asset1.gif' alt='rotating image of the asset' style="max-width:100%;max-height:100%;">
+            <img id='asset_image' src='static/img/asset1.gif' alt='rotating image of the asset' style="max-width:100%;max-height:100%;">
         </div>
 
     </div>
@@ -61,7 +62,7 @@
 
 
 <div id='container_iframe'>
-    <iframe id='ain' src='https://www.sapfioritrial.com/' height='100%' width='100%'></iframe>
+    <iframe id='ain' src='http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview' height='100%' width='100%'></iframe>
 
 </div>
 
@@ -74,7 +75,7 @@
 
 
 </body>
-  <script src="js/jquery1-12-1.js"></script>
- <script src="js/edit_texts_here.js"></script>
-  <script src="js/script.js"></script>
+  <script src="static/js/jquery1-12-1.js"></script>
+  <script src="static/js/edit_texts_here.js"></script>
+  <script src="static/js/script.js"></script>
 </html>

@@ -4,6 +4,7 @@ from multiprocessing import Process, Queue
 import pygame
 import RFID
 import Pump
+import json
 from flask import Flask, render_template
 from Webserver import WebSocketHandler
 
@@ -11,6 +12,13 @@ class Participant(object):
     """
     class for the participants
     """
+    #events
+    operator_needs_asset=1
+    operator_bought_asset=2
+    operator_asset_brocken=3
+    operator_infos_from_bulletin=4
+    operator_asset_repared=5
+    event_pimped_asset=6
     
     def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None):
         self.GPIO_out = gpio_out
@@ -21,13 +29,17 @@ class Participant(object):
           GPIO.setup(service_bulletin_out, GPIO.OUT)
           GPIO.setup(service_bullete_measure, GPIO.IN)
     @classmethod
-    def speak(cls, participant, message):
-        WebSocketHandler.send_updates(participant+": "+message)
+    def update_event(cls, event):
+       data = {}
+       data['event'] = event
+       json_data = json.dumps(data)
+       WebSocketHandler.send_updates(json_data)
     
     @staticmethod
-    def blink_service(out, frequenz):
+    def blink_service(out, frequenz, main_queue):
         qu=Queue()
-        pr=Process(target=Participant.activate_actor, args=(out,qu,frequenz))
+        pr=Process(target=Participant.activate_actor, args=(out,qu,frequenz, main_queue))
+        pr.daemon = True
         pr.start()
         return qu
         
@@ -36,8 +48,8 @@ class Participant(object):
           qu.put("Stop")
           
     @staticmethod
-    def activate_actor(gpio, queue, frequenz):
-        while queue.empty():
+    def activate_actor(gpio, queue, frequenz, main_queue):
+        while queue.empty() and main_queue.empty():
           # LED an
           GPIO.output(gpio, GPIO.HIGH)
           # Warte 100 ms
@@ -49,8 +61,9 @@ class Participant(object):
           
     @staticmethod
     def asset_bough(asset):
-          greating="Great choice! You just bought the Asset "
-          WebSocketHandler.send_updates(greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price))
+          #greating="Great choice! You just bought the Asset "
+          Participant.update_event(2)
+          #WebSocketHandler.send_updates(greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price))
           #Participant.show_img("img/2.PNG")
           time.sleep(1)
           #Participant.show_img("img/3.PNG")
