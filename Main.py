@@ -226,14 +226,9 @@ def main(a,queue):
   
   finally:  
     GPIO.cleanup() # this ensures a clean exit  
- 
-    
-    
-    
-    
-    
-    
-    
+#and main method
+
+
 
 def check_ready_to_start():
     ready=True
@@ -262,8 +257,11 @@ class StopHandler(tornado.web.RequestHandler):
          def get(self):
             #GPIO.cleanup()
             #GPIO.setmode(GPIO.BOARD)
-            print "Attempting"
-            qu.put("Stop")
+            print "Attempting to stop"
+            try:
+              qu.put("Stop")
+            except NameError:
+              print "nothing to stop"
      
 
 settings = {

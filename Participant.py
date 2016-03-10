@@ -29,9 +29,10 @@ class Participant(object):
           GPIO.setup(service_bulletin_out, GPIO.OUT)
           GPIO.setup(service_bullete_measure, GPIO.IN)
     @classmethod
-    def update_event(cls, event):
+    def update_event(cls, event, asset_rfid_id=0):
        data = {}
        data['event'] = event
+       data['asset_rfid_id'] = asset_rfid_id
        json_data = json.dumps(data)
        WebSocketHandler.send_updates(json_data)
     
@@ -62,7 +63,7 @@ class Participant(object):
     @staticmethod
     def asset_bough(asset):
           #greating="Great choice! You just bought the Asset "
-          Participant.update_event(2)
+          Participant.update_event(2, asset.RFID_Identifier)
           #WebSocketHandler.send_updates(greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price))
           #Participant.show_img("img/2.PNG")
           time.sleep(1)

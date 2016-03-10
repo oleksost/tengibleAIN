@@ -36,8 +36,8 @@ function replace_iframe(current_url){
 
 
 
-// Reset all Values
-function reset_all_texts(){
+// Reset all Values, event number and rfid number of the asset as input variables
+function reset_all_texts(event_nr, esset_rfid_id){
 	replace_marketing(initial_marketing);
 	replace_asset(initial_asset);
 	replace_instruction(initial_instruction);
@@ -54,48 +54,21 @@ function python_test(){
 	replace_iframe("http://www.w3schools.com/");
 }
 
-function on_click_start(){
-$.ajax({
+//STOP 
+function stop_demo(){
+        $.ajax({
             type: 'GET',
-            url: "/start/",
-            data: 1,
-            success: function (data) {            
-               
-}});
+            url: "/stop/",
+            data: 0,
+            success: function (data) {
+              
+             }
+        });
 }
-function on_click_start(){
-$.ajax({
-            type: 'GET',
-            url: "/start/",
-            data: 1,
-            success: function (data) {            
-               
-}});
-}
-
 
 // INITIAL SETUP
 $( document ).ready(function() {
 	console.log("document loaded");
-	reset_all_texts();
-    //var content = JSON.parse(content)
-    //var xml_data;
-    //$.ajax({
-    //        type: 'GET',
-      //      async: false,
-       //     url: "/get_content_xml/",
-         //   success: function (data) {
-           //    xml_data=data;
-               
-           // }
-       // });
-	 //$xml = $( xml_data );
-    //console.log($test.text());
-
-    // Find Person Tag
-    // var $person = $xml.find("person");
-    //var $event = $xml.find('event[id="1"]');
-    //alert(xml_data);
 	if ("WebSocket" in window){
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            var messagecount = 0
@@ -103,9 +76,10 @@ $( document ).ready(function() {
               messagecount += 1;
               //jQuery(".hold").attr('id','pieSlice' + evt.data);
               var event = JSON.parse(evt.data);
-              //$test = $xml.find('event[id='+event.event+']');
+              event_nr=event.event;
+              esset_rfid_id=event.asset_rfid_id;
+              //reset_all_texts(event_nr, esset_rfid_id);
               jQuery("#container_speach").html(evt.data);
-              
            }
            ws.onopen = function() {
               messagecount = 0;
@@ -157,14 +131,7 @@ $("#button_stop").click(function(evt) {
      
 //STOP EXECUTION ON RELOAD 
 window.onbeforeunload = function(event){ 
-            $.ajax({
-            type: 'GET',
-            url: "/stop/",
-            data: 0,
-            success: function (data) {
-              
-             }
-        });
+           stop_demo();
     };     
 
 
