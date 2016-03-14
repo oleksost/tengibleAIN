@@ -16,12 +16,21 @@
 </head>
 
 <body>
+    <div id="title"><span style="font-weight: bold">SAP</span>&nbsp;ASSET INTELLIGENCE NETWORK</div>
+
+    <div type="button" id="button_start">Start demo</div>
+    <div type="button" id="button_stop">Stop demo</div>
+
+<div id='container_iframe'>
+    <iframe id='ain' src='http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview'></iframe>
+
+</div>
 
 
 <div id='container_main'>
+     <!-- Texts -->
     <div id='container_marketing'>
-    <div type="button" id="button_start">Start demo</div>
-    <div type="button" id="button_stop">Stop demo</div>
+
            <div id='marketing_headline' class='headline'>
             Installation of a new Asset
         </div>
@@ -29,49 +38,55 @@
             AIN is really great because the installation of new assets is really simple. You just connect your device to the network and all the necessary data is directly pulled from the manufacturer. No more need for updates and no more fear of using outdated software. With AIN you are always on the safe side!
         </div>
     </div>
+       <!-- Virtual Twin -->
     <div id='container_virtual_twin'>
         <div class='headline'>
             Digital Twin
         </div>
-        <div>
-        <span class='label'>Equipment:&nbsp;</span>
-        <span id='twin_id'>
-            PP-1234 XZ
-        </span>
-          </div>
-        <div>
-        <span class='label'>Model:&nbsp;</span>
-        <span id='twin_model'>
-            Seawater Pump
-        </span>
-        </div>
-        <div>
-            <span class='label'>Status:&nbsp;</span>
-            <span id='twin_status'>
-                operating
-            </span>
-        </div>
 
-        <!-- image -->
+       <!-- image -->
         <div id='container_twin_image'>
             <img id='asset_image' src='static/img/asset1.gif' alt='rotating image of the asset' style="max-width:100%;max-height:100%;">
         </div>
 
+        <!-- data -->
+        <div class='twindata'>
+        <div class='label'>Equipment:&nbsp;</div>
+        <div id='twin_id'>
+            PP-1234 XZ
+        </div>
+          </div>
+        <div class='twindata'>
+
+        <div class='label'>Model:&nbsp;</div>
+        <div id='twin_model'>
+            Seawater Pump
+        </div>
+        </div>
+        <div class='twindata'>
+            <div class='label'>Status:&nbsp;</div>
+            <div id='twin_status'>
+                operating
+            </div>
+        </div>
+
+ 
+
     </div>
-</div>
-
-
-<div id='container_iframe'>
-    <iframe id='ain' src='http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview' height='100%' width='100%'></iframe>
-
-</div>
-
-<div id='container_instructions'>
-    
+        <!-- Minifigure -->
+    <div id='container_instructions'>
+    <div id='speaker' class='headline'>Operator</div>
+    <div id='container_minifigure'></div>
     <div id='container_speach'>
        Please buy a new asset for the manufacturer!
     </div>
 </div>
+
+</div>
+
+
+
+
 
 
 </body>
