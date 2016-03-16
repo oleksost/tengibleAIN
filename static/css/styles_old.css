@@ -1,23 +1,15 @@
-html{
-	background-image: url("../img/background.jpg");
-	background-size: cover;
-	background-repeat: no-repeat;
-	min-height: 980px;
-}
-
 body{
 	 font-family: 'BentonSans', Verdana, 'Lucida Sans Unicode', sans-serif;
 	 color: #EDEDED;
-	 background-image: url("../img/circuits.png");
+	 background-image: url("../img/bg.jpg");
 	 background-repeat: no-repeat;
-	 background-position: bottom left;
+	 background-size: cover;
 	 padding: 3rem;
-	 display: inline-block;
 }
 
 div{
-	/*border: 1px dashed #333333;*/
-	display: inline-block;
+	/* border: 1px dashed #333333; */
+	display: inline-block; 
 	}
 
 
@@ -68,7 +60,7 @@ iframe{
 	width: 33%;
 	min-height: 30rem;
 	/*background-color: rgba(100, 100, 100, 0.3);*/
-
+	margin-left: 3rem;
 }
 
 
@@ -79,15 +71,14 @@ iframe{
 	width: 100%;
 	height: 40%;
 	min-height: 40%;
-	min-height: 20rem;
-	background-image: url("../img/connector_top.png");
-	background-repeat: no-repeat;
-	background-position: top left;
-	padding-left: 3rem;
+	min-height: 10rem;
+
+
 }
 
 
 #marketing_text{
+	min-height: 20rem;
 	max-width: 40rem;
 	line-height: 150%;
 	overflow: auto;
@@ -97,16 +88,13 @@ iframe{
 #container_virtual_twin{
 	width: 100%;
 	height: 30%;
-	min-height: 10rem;
+	min-height: 15%;
 	overflow: hidden;
-	background-image: url("../img/connector_middle.png");
-	background-repeat: no-repeat;
-	background-position: top left;
-	padding-left: 3rem;
+
 }
 
 #container_twin_image{
-	width: 40%;
+	width: 50%;
 	max-width: 60%;
 	max-height: 80%;
 	overflow: hidden;
@@ -115,43 +103,36 @@ iframe{
 	display: block;
 }
 
-#container_twin_image img{
-	max-height: 100%;
+
+#asset_image{
 	max-width: 100%;
+	max-height: 100%;
 }
 
 
+
 #container_instructions{
-	min-height: 20rem;
-	width: 100%;
-	background-image: url("../img/connector_bottom.png");
-	background-repeat: no-repeat;
-	background-position: top left;
-	padding-left: 3rem;
+	min-height: 20%;
 
 }
 
 #container_minifigure{
-	width: 40%;
-	min-width: 5rem;
-	min-height: 15rem;
+	min-width: 10rem;
+	min-height: 20rem;
 	background-image: url('../img/persona1.png');
 	background-repeat: no-repeat;
-	background-position: bottom center;
-	background-size: contain;
+	background-position: bottom left;
 	float: left;
 }
 
 #container_speach{
-	width: 60%;
+	width: 22rem;
 	height: 12rem;
-	padding: 1rem;
-	padding-left: 2.5rem;
-	line-height: 1.2rem;
+	opacity: .9;
+	padding: 2rem;
 	background-image: url('../img/speachbubble.png');
 	background-repeat: no-repeat;
-	background-size: contain;
-	color: #365876;
+	color: #333333;
 	overflow: hidden;
 
 	
@@ -159,7 +140,7 @@ iframe{
 }
 
 
-/* TEXTS */
+
 
 
 .label{
@@ -182,27 +163,25 @@ iframe{
 	text-transform: uppercase;
 }
 
+#marketing_text{
+	margin: 1rem;
+}
 
 
 
 
 
 
-
+/* ADDITIONS */
 
 
 /* SMALL SCREEN */
 
 @media (max-width: 1280px){
 
-	html{
-		min-height: 100%;
-	}
-
 	body{
 		padding: 1rem;
 		font-size: 0.8rem;
-		background-size: 60%;
 	}
 
 	#title{
@@ -218,14 +197,8 @@ iframe{
 	}
 
 
-	#container_iframe{
-		height: 92%;
-		min-height: 92%;
-		border-width: 3px;
-	}
-
-	#container_marketing{
-		min-height: 18rem;
+	#marketing_text{
+		min-height: 10rem;
 
 	}
 
@@ -240,33 +213,26 @@ iframe{
 		max-height: 5rem;
 	}
 
-	#container_instructions{
-	height: 20%;
-	min-height: 5rem;
-
-}
-
 	#container_minifigure{
 	min-width: 5rem;
 	width: 30%;
 	max-width: 30%;
-	min-height: 5rem;
+	min-height: 10rem;
+	background-size: 90%;
+	background-position: bottom center;
 
 	}
 
 	#container_speach{
-	width: 68%;
-	height: 100%;
-	min-height: 5rem;
-	max-height: 10rem;
-	background-size: 100% 100%;
-	padding: 0.6rem;
-	padding-left: 1.7rem;
-	line-height: 1rem;
-	
+	max-width: 65%;
+	max-height: 20%;
+	background-size: 100%;
+	padding: 1.5rem;
 	}
 
 	
-#marketing_text{
-	margin: 1rem;
+	
+
+
+
 }
