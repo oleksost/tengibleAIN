@@ -25,6 +25,14 @@ class Operator(Participant):
         #while not self.Has_asset:
         self.Asset=Operator.readRFID(self,manufacturer.Catalog, main_queue)
         manufacturer.set_next_asset_update_time()
+        print str(manufacturer.Bulletin_at_campus)
+        manufacturer.check_bulletin()
+        print str(manufacturer.Service_Bulletin_GPIO_Measure)
+        print str(manufacturer.Bulletin_at_campus)
+        if not manufacturer.Bulletin_at_campus:
+            #Participant.update_event(8)
+            print("To receive new updates verify the bulletin at manufacturers")
+        
         self.Asset_is_working=True 
         self.Asset_not_on_RFID=0
         self.Asset.set_next_break()

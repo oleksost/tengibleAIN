@@ -5,7 +5,6 @@ import pygame
 import RFID
 import Pump
 import json
-from flask import Flask, render_template
 from Webserver import WebSocketHandler
 
 class Participant(object):

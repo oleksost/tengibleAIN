@@ -12,7 +12,7 @@ EVENTS
 var initial_asset = "a0";
 var initial_marketing = "event0";
 var initial_instruction = "event0";
-var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
+//var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
 
 
 
@@ -29,7 +29,9 @@ function replace_asset(asset_){
 	$( "#twin_id" ).text(asset[asset_][0]);
 	$( "#twin_model" ).text(asset[asset_][1]);
 	$( "#twin_status" ).text(asset[asset_][2]);
+	if (!(asset_=="a000")){
 	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][3]+".gif"); 
+	}else {$( "#asset_image" ).attr('src', "");}
 }
 
 
@@ -56,12 +58,13 @@ function reset_all_texts(event_nr, esset_rfid_id){
     var event_="event"+event_nr.toString();
 	replace_marketing(event_);
 	replace_instruction(event_);
-	if(esset_rfid_id!=0 && event_nr!=1 ){
+	if(!(esset_rfid_id==0) && !(event_nr==1) ){
+	
 	    var asset = "a"+esset_rfid_id.toString();
 	    replace_asset(asset);    
-	}else if (event_nr==1){
+	}else if (event_nr==1 || event_nr==0){
 	//is no asset on the rfid
-	    var asset_ = ""+"000";
+	    var asset_ = "a"+"000";
 	    replace_asset(asset_);
 	}
 	//replace_iframe(initial_url);
@@ -85,8 +88,9 @@ function stop_demo(){
 $( document ).ready(function() {
 	console.log("document loaded");
 	//test
-	//reset_all_texts(2, 138);
+	//reset_all_texts(0, 0);
 	if ("WebSocket" in window){
+           //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            var messagecount = 0
            ws.onmessage = function(evt) {
@@ -113,6 +117,7 @@ $( document ).ready(function() {
 
 //START THE DEMO
 $("#button_start").click(function(evt) {
+    console.log("starting...");
      $.ajax({
             type: 'GET',
             url: "/start/",

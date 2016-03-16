@@ -9,7 +9,7 @@ class Manufacturer(Participant):
       """
       Manufacturer is a Participant, Manufacturer has additionaly a service Bullete to update his asset on the Operator's side
       """
-      def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, bulletin_at_campus=True, bulletin=None):
+      def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, bulletin_at_campus=False, bulletin=None):
         super(Manufacturer, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure)
         self.Bulletin=bulletin
         self.Bulletin_at_campus=bulletin_at_campus
@@ -24,6 +24,14 @@ class Manufacturer(Participant):
       def activate_bulletin(self, main_gueue):
         self.Bulletin.Activated=True
         self.blinker_Queue=Participant.blink_service(self.Service_Bulletin_GPIO_out, 0.3, main_gueue)
+        
+      def check_bulletin(self):
+        GPIO.output(self.Service_Bulletin_GPIO_out, GPIO.HIGH)
+        if GPIO.input(self.Service_Bulletin_GPIO_Measure)==0:
+          self.Bulletin_at_campus=False
+        else:
+          self.Bulletin_at_campus=True
+        GPIO.output(self.Service_Bulletin_GPIO_out, GPIO.LOW)
         
       def deactivate_bulletin(self):
         self.Bulletin.Activated=False

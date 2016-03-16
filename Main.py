@@ -29,7 +29,17 @@ import RFID
 
 # RPi.GPIO Layout verwenden (wie Pin-Nummern)
 GPIO.setmode(GPIO.BOARD)
-#events
+
+#EVENTS
+#1 - installation of  a new aset
+#2 - new asset installed, show new asset information
+#3 - Asset is brocken
+#4 - new update service Bulletin
+#5 - Asset repaired
+#6 - asset can be pimped 
+#7 - Asset is pimped
+#8 - Bulletin is not at manufacturers after asset changed
+
 error=0
 operator_needs_asset=1
 operator_bought_asset=2
@@ -53,6 +63,9 @@ pygame.display.init()
 
 
 def get_alife(Manufacturer_GPIO_out,Service_GPIO_out,Operator_GPIO_out):
+     print str(Manufacturer_GPIO_out)
+     print str(Service_GPIO_out)
+     print str(Operator_GPIO_out)
      GPIO.output(Manufacturer_GPIO_out, GPIO.HIGH)
      GPIO.output(Service_GPIO_out, GPIO.HIGH)
      GPIO.output(Operator_GPIO_out, GPIO.HIGH)
@@ -122,13 +135,13 @@ def main(a,queue):
    OUT_operator=12
    BREAK_ASSET=40
    SERVICE_BULETTE_FABRIK=31
-   SERVICE_BULETTE_FABRIK_MEASURE=33
-   SERVICE_BULETTE_CUSTOMER=16
+   SERVICE_BULETTE_FABRIK_MEASURE=35
+   SERVICE_BULETTE_CUSTOMER=32
    SERVICE_BULETTE_CUSTOMER_MEASURRE=18
 
-   Manufacturer=Manufacturer(OUT_manufacturer, SERVICE_BULETTE_FABRIK, SERVICE_BULETTE_FABRIK_MEASURE, bulletin=Bulletin())
+   Manufacturer=Manufacturer(OUT_manufacturer, service_bulletin_out=SERVICE_BULETTE_FABRIK, service_bullete_measure=SERVICE_BULETTE_FABRIK_MEASURE, bulletin=Bulletin())
    Service=Service(OUT_service)
-   Operator=Operator(OUT_operator,SERVICE_BULETTE_CUSTOMER,SERVICE_BULETTE_CUSTOMER_MEASURRE, pimp_gpio=PIMP_GPIO)
+   Operator=Operator(gpio_out=OUT_operator, service_bulletin_out=SERVICE_BULETTE_CUSTOMER, service_bullete_measure=SERVICE_BULETTE_CUSTOMER_MEASURRE, pimp_gpio=PIMP_GPIO)
  
    GPIO.setup(BREAK_ASSET, GPIO.IN)
    #speak_start()
@@ -137,38 +150,61 @@ def main(a,queue):
    #WebSocketHandler.send_updates("Hello, I am working")
    Operator.buy_asset(Manufacturer, queue)
       
-   bulletin_activation=0
+   #bulletin_activation=0
 
-   GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
+   #GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
 
    #endless loop
-   print "runing main"
+   #print "runing main"
    while queue.empty():
   
     #check if Info Bulletin is plugged in the manufacturer, false by default and if not activated  
     bulletin_in=ckeck_if_info_bulletin_in_place(Manufacturer.Service_Bulletin_GPIO_Measure)
     
+    
+    
+    
     #checking if the Asset is on the RFID reader
     Operator.check_asset()
     
+    
+    
     if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulletin_in and not Manufacturer.Bulletin.Activated and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
          Manufacturer.Bulletin.Activated=True
+         print ("Bulleting activated, bring it to the operator")
          bulletin_in=True
          Manufacturer.activate_bulletin(queue)
+         GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
          
     if Manufacturer.Bulletin.Activated and not bulletin_in and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-         Manufacturer.Bulletin.Activated=False
-         Manufacturer.Bulletin_at_campus=False
-         GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)  
-         
-    if not Manufacturer.Bulletin.Activated and bulletin_in and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-         Manufacturer.deactivate_bulletin()
+         #Manufacturer.Bulletin.Activated=False
          bulletin_in=False
-         Manufacturer.Bulletin_at_campus=True
+         Manufacturer.Bulletin_at_campus=False
+         #GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
+         
+    if Manufacturer.Bulletin.Activated and bulletin_in and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
+       print ("Bring activated Bulletinn to the operator")
+       Manufacturer.Bulletin_at_campus=True
+       
+    if not Manufacturer.Bulletin_at_campus:
+        Manufacturer.check_bulletin();
+        
+    #if not Manufacturer.Bulletin.Activated and bulletin_in and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
+     #    Manufacturer.deactivate_bulletin()
+      #   bulletin_in=False
+       #  Manufacturer.Bulletin_at_campus=True
          
     #checking if the received the update from the Bulletin 
-    if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==1 and not Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
+    if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulletin_in and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
+         #Manufacturer.Bulletin.Activated=True
+         #bulletin_in=True
+         #Manufacturer.activate_bulletin(queue)
+         GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
+    
+    if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus and not Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
          Manufacturer.inform_operator_about_Update(Operator)
+         #Manufacturer.Bulletin.Activated=False
+         #Manufacturer.Bulletin_at_campus=True
          
          
     if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
@@ -180,6 +216,10 @@ def main(a,queue):
        
     if not Operator.Has_asset:
              #print "No Asset"
+             if Manufacturer.Bulletin.Activated:
+               Manufacturer.deactivate_bulletin()
+             print ("Bulleting deactivating")
+             Manufacturer.Bulletin.Activated=False
              Operator.buy_asset(Manufacturer, queue)
              #Operator.Asset.set_next_break()   
              
