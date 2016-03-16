@@ -1,33 +1,48 @@
+/*
+EVENTS
+1 - installation of  a new aset
+2 - new asset installed, show new asset information
+3 - Asset is brocken
+4 - new update service Bulletin
+5 - Asset repaired
+6 - asset can be pimped 
+7 - Asset is pimped
+*/
 
-
-var initial_asset = "a1";
-var initial_marketing = "m1";
-var initial_instruction = "i1";
+var initial_asset = "a0";
+var initial_marketing = "event0";
+var initial_instruction = "event0";
 var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
 
 
 
 
 // Replace Text of Marketing
-function replace_marketing(current_marketing){
-	$( "#marketing_headline" ).text(marketing[current_marketing][0]);
-	$( "#marketing_text" ).text(marketing[current_marketing][1]);
+function replace_marketing(event_){
+	$( "#marketing_headline" ).text(marketing[event_][0]);
+	$( "#marketing_text" ).text(marketing[event_][1]);
 }
 
 // Replace Text of Digital Twin
-function replace_asset(current_asset){
-	$( "#twin_id" ).text(asset[current_asset][0]);
-	$( "#twin_model" ).text(asset[current_asset][1]);
-	$( "#twin_status" ).text(asset[current_asset][2]);
-	$( "#asset_image" ).attr('src', "static/img/"+asset[current_asset][3]+".gif"); 
+function replace_asset(asset_){
+    console.log(asset_);
+	$( "#twin_id" ).text(asset[asset_][0]);
+	$( "#twin_model" ).text(asset[asset_][1]);
+	$( "#twin_status" ).text(asset[asset_][2]);
+	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][3]+".gif"); 
 }
 
 
-// Replace the Text of the Instructions
-function replace_instruction(current_instruction){
-	$( "#container_speach").text(instruction[current_instruction][0]);
+// Replace the Instructions and the speaker
+function replace_instruction(event_){
+	$( "#container_speach").text(instruction[event_][0]);
+	//replace the speaker
+	console.log(instruction[event_][1][0]);
+	$( "#speaker" ).text(instruction[event_][1][0]);
+	//replace the speaker's image
+	$( "#container_minifigure" ).css('background-image', "url(static/img/"+instruction[event_][1][1]);
+	
 }
-
 
 // Replace Source of iFrame
 function replace_iframe(current_url){
@@ -38,23 +53,23 @@ function replace_iframe(current_url){
 
 // Reset all Values, event number and rfid number of the asset as input variables
 function reset_all_texts(event_nr, esset_rfid_id){
-	replace_marketing(initial_marketing);
-	replace_asset(initial_asset);
-	replace_instruction(initial_instruction);
+    var event_="event"+event_nr.toString();
+	replace_marketing(event_);
+	replace_instruction(event_);
+	if(esset_rfid_id!=0 && event_nr!=1 ){
+	    var asset = "a"+esset_rfid_id.toString();
+	    replace_asset(asset);    
+	}else if (event_nr==1){
+	//is no asset on the rfid
+	    var asset_ = ""+"000";
+	    replace_asset(asset_);
+	}
 	//replace_iframe(initial_url);
 	console.log("all texts reset");
 }
+    
 
-// TRY TO CALL THIS FUNCTION VIA THE RASPBERRY PI
-function python_test(){
-	console.log("python test successfull");
-	replace_marketing("m2");
-	replace_asset("a3");
-	//replace_instruction("i1");
-	replace_iframe("http://www.w3schools.com/");
-}
-
-//STOP 
+//STOP DEMO
 function stop_demo(){
         $.ajax({
             type: 'GET',
@@ -69,6 +84,8 @@ function stop_demo(){
 // INITIAL SETUP
 $( document ).ready(function() {
 	console.log("document loaded");
+	//test
+	//reset_all_texts(2, 138);
 	if ("WebSocket" in window){
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            var messagecount = 0
@@ -78,8 +95,9 @@ $( document ).ready(function() {
               var event = JSON.parse(evt.data);
               event_nr=event.event;
               esset_rfid_id=event.asset_rfid_id;
-              //reset_all_texts(event_nr, esset_rfid_id);
-              jQuery("#container_speach").html(evt.data);
+              reset_all_texts(event_nr, esset_rfid_id);
+              //alert("Hallo");
+              //jQuery("#container_speach").html(evt.data);
            }
            ws.onopen = function() {
               messagecount = 0;
@@ -125,9 +143,6 @@ $("#button_stop").click(function(evt) {
              }
         });
      });
-     
-     
-     
      
 //STOP EXECUTION ON RELOAD 
 window.onbeforeunload = function(event){ 
