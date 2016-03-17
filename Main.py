@@ -29,7 +29,7 @@ import RFID
 
 # RPi.GPIO Layout verwenden (wie Pin-Nummern)
 GPIO.setmode(GPIO.BOARD)
-
+ASSET_INSTALLED=False
 #EVENTS
 #1 - installation of  a new aset
 #2 - new asset installed, show new asset information
@@ -144,6 +144,9 @@ def main(a,queue):
    Operator=Operator(gpio_out=OUT_operator, service_bulletin_out=SERVICE_BULETTE_CUSTOMER, service_bullete_measure=SERVICE_BULETTE_CUSTOMER_MEASURRE, pimp_gpio=PIMP_GPIO)
    GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.LOW)
    GPIO.output(Manufacturer.Service_Bulletin_GPIO_out, GPIO.LOW)
+   
+   global ASSET_INSTALLED
+   
  
  
    GPIO.setup(BREAK_ASSET, GPIO.IN)
@@ -160,57 +163,15 @@ def main(a,queue):
    ###keeping track on hints, starting always with an empty hint display####
    current_hint=1
    
+   
    while queue.empty():
+    print "asset installed: " + str(ASSET_INSTALLED)
     #checking if the Asset is on the RFID reader
     Operator.check_asset()
     
-    """
-        #check if Info Bulletin is plugged in the manufacturer, false by default and if not activated  
-    bulletin_in=ckeck_if_info_bulletin_in_place(Manufacturer.Service_Bulletin_GPIO_Measure)
- 
-    if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulletin_in and not Manufacturer.Bulletin.Activated and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-         Manufacturer.Bulletin.Activated=True
-         print ("Bulleting activated, bring it to the operator")
-         bulletin_in=True
-         Manufacturer.activate_bulletin(queue)
-         GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
-         
-    if Manufacturer.Bulletin.Activated and not bulletin_in and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-         #Manufacturer.Bulletin.Activated=False
-         bulletin_in=False
-         Manufacturer.Bulletin_at_campus=False
-         #GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
-         
-    if Manufacturer.Bulletin.Activated and bulletin_in and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-       print ("Bring activated Bulletinn to the operator")
-       Manufacturer.Bulletin_at_campus=True
-       
-    if not Manufacturer.Bulletin_at_campus:
-        Manufacturer.check_bulletin();
-        
-    #if not Manufacturer.Bulletin.Activated and bulletin_in and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-     #    Manufacturer.deactivate_bulletin()
-      #   bulletin_in=False
-       #  Manufacturer.Bulletin_at_campus=True
-         
-    #checking if the received the update from the Bulletin 
-    if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulletin_in and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
-         #Manufacturer.Bulletin.Activated=True
-         #bulletin_in=True
-         #Manufacturer.activate_bulletin(queue)
-         GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
-    
-    if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus and not Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
-         Manufacturer.inform_operator_about_Update(Operator)
-         #Manufacturer.Bulletin.Activated=False
-         #Manufacturer.Bulletin_at_campus=True
-         
-         
-    if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
-         Operator.Informed_about_recent_update=False
-    """
+    if Operator.Has_asset and ASSET_INSTALLED:
     ##BULLETIN HANDLING###  
-    if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin.Activated and not Operator.Asset.Brocken and Operator.Has_asset:
+      if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin.Activated and not Operator.Asset.Brocken and Operator.Has_asset:
          Manufacturer.Bulletin.Activated=True
          Manufacturer.Bulletin_at_campus=True
          #activated, bring to the operator
@@ -219,29 +180,32 @@ def main(a,queue):
          Manufacturer.activate_bulletin(queue)
          reminded_5=False
          
-    if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
+      if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
          Manufacturer.activate_bulletin(queue)
          Manufacturer.Bulletin_at_campus=True
          Participant.update_event(8, hint_id=1)
          current_hint=1
          
-    if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
+      if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
          Manufacturer.deactivate_bulletin()
          Manufacturer.Bulletin_at_campus=False
          Participant.update_event(8, hint_id=1)
          current_hint=1
          
-    if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
+      if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
          print "Informing"
          Manufacturer.inform_operator_about_Update(Operator)
     ##END BULLETIN HANDLING###  
     
     #manually break the asset
-    if GPIO.input(BREAK_ASSET)==1 and not Operator.Asset.Brocken and Operator.Has_asset:
+      if GPIO.input(BREAK_ASSET)==1 and not Operator.Asset.Brocken and Operator.Has_asset:
          Operator.Asset_is_working=False
-       
-    if not Operator.Has_asset:
+      #random asset break
+     #if datetime.datetime.now()>Operator.Asset.Next_Break and Operator.Asset_is_working and not Operator.Asset.Brocken and Operator.Has_asset:
+     #           Operator.Asset_is_working=False   
+    if not Operator.Has_asset and ASSET_INSTALLED:
              print "No Asset"
+             ASSET_INSTALLED=False
              #if Manufacturer.Bulletin.Activated:
               # Manufacturer.deactivate_bulletin()
              #print ("Bulleting deactivating")
@@ -256,9 +220,7 @@ def main(a,queue):
          global blinker_Queue
          blinker_Queue=Service.blink_service(Service.GPIO_out,0.5, queue)
         
-    #random asset break
-    if datetime.datetime.now()>Operator.Asset.Next_Break and Operator.Asset_is_working and not Operator.Asset.Brocken and Operator.Has_asset:
-               Operator.Asset_is_working=False
+    
          
     ##HANDLING THE SERVICE CAR AND REPAIRING THE ASSET##
     #check for the status on the repair GPIO of the asset, if a magnet is on the senscor, the GPIO_to_repair of the asset is 0
@@ -302,10 +264,10 @@ def main(a,queue):
                current_hint=1
     ### END HANDLING THE SERVICE CAR AND REPAIRING THE ASSET##
     
-    
+    if ASSET_INSTALLED:
     ####HANDLING ASSET PIMPING#######
     #remind to pimp the asset
-    if datetime.datetime.now()>Operator.Asset.Next_Pimp and current_hint==1 and not Operator.Asset.Pimped and not reminded_5 and not Operator.Asset.Brocken and Operator.Has_asset:
+      if datetime.datetime.now()>Operator.Asset.Next_Pimp and current_hint==1 and not Operator.Asset.Pimped and not reminded_5 and not Operator.Asset.Brocken and Operator.Has_asset:
               #hint priority handling
               if current_hint==1 or current_hint==3:
                Participant.update_event(8, hint_id=5)
@@ -313,21 +275,18 @@ def main(a,queue):
                reminded_5=True
                
     ####Pimping the asset
-    if GPIO.input(Operator.Pimp_GPIO)==1 and not Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
+      if GPIO.input(Operator.Pimp_GPIO)==1 and not Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
                Operator.pimp_the_pump()
                #clean the hint display
                Participant.update_event(8, hint_id=1)
                current_hint=1
                
-    if GPIO.input(Operator.Pimp_GPIO)==0 and Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
+      if GPIO.input(Operator.Pimp_GPIO)==0 and Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
                Operator.unpimp_the_pump()
                Operator.Asset.set_next_pimp_reminder()
                reminded_5=False
 
    print "stoped"
-   #blinker_Queue.put("stop")
-   #Participant.stop_blink_service(Manufacturer.blinker_Queue)  
-   #Participant.stop_blink_service(blinker_Queue)
    
   except KeyboardInterrupt:  
     # here you put any code you want to run before the program  
@@ -355,14 +314,15 @@ class StartHandler(tornado.web.RequestHandler):
      def get(self):
             #GPIO.cleanup()
             GPIO.setmode(GPIO.BOARD)
-            global qu
+            
+            global Main_Queue
             global main_thread
             #print("button click")
             #check if everythings in place
             (ready, msg)=check_ready_to_start()
             if threading.active_count()<4:
-              qu=Queue()
-              main_thread=threading.Thread(target=main, args=(1,qu))
+              Main_Queue=Queue()
+              main_thread=threading.Thread(target=main, args=(1,Main_Queue))
               main_thread.daemon = True
               main_thread.start()
               #main_thread.join()
@@ -382,6 +342,13 @@ class StopHandler(tornado.web.RequestHandler):
               
             except NameError:
               print "nothing to stop"
+              
+class InstalledHandler(tornado.web.RequestHandler):
+         def get(self):
+           global ASSET_INSTALLED
+           print "setting intalled"
+           if ASSET_INSTALLED==False:
+            ASSET_INSTALLED=True
      
 
 settings = {
@@ -393,12 +360,14 @@ application = tornado.web.Application([
     (r"/websocket", WebSocketHandler),
     (r"/start/", StartHandler),
     (r"/stop/", StopHandler),
+    (r"/asset_installed/", InstalledHandler),
     #(r"/get_content_xml/", XMLLoader),
 ],debug=True, **settings)
 
         
 if __name__ == "__main__":
   try:
+    global ASSET_INSTALLED
     tornado.httpserver.HTTPServer.allow_reuse_address = True
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.allow_reuse_address = True

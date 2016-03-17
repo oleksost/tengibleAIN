@@ -2,6 +2,9 @@
 EVENTS
 1 - installation of  a new aset
 2 - new asset installed, show new asset information
+  2.e0 - asset registration
+  2.e1 - asset synchronisation
+  2.e2 - asset synchronisation Manufacturer responce
 3 - Asset is brocken
 4 - new update service Bulletin
 5 - Asset repaired
@@ -15,6 +18,22 @@ var initial_marketing = "event0";
 var initial_instruction = "event0";
 //var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
 
+// Switch between iFrame and screenshots
+function screen_mode(mode){
+  console.log("changing screenmode to "+mode);
+ $("#container_iframe").empty(); // clears iframe container
+ switch(mode){
+    case "screenshot":  $("#container_iframe").append("<img id='screenshot' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");
+                        console.log("changed to screenshot");
+          break;
+    case "iframe": $("#container_iframe").append("<iframe id='ain' src='http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview'></iframe>");
+          console.log("changed to iframe");
+          break;
+    default: $("#container_iframe").append("<img id='screenshot' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");   
+            console.log("changed to default");
+
+  }
+}
 
 
 
@@ -78,16 +97,61 @@ function display_hint(fint_nr){
   $( "#hints" ).text(hints[hint][0]); 
   //console.log(hints[hint][0]);
 }
+function replace_screen(img){
 
+
+}
+
+
+//TODO_: implement this function in a loop
+function install_pump(event_){
+   //console.log(instruction[event_]["e1"][2]);
+   replace_screen(instruction[event_]["e0"][2]);
+   $( "#marketing_headline" ).text(marketing[event_]["e0"][0]);
+   $( "#marketing_text" ).text(marketing[event_]["e0"][1]);
+   $( "#speaker" ).text(instruction[event_]["e0"][1][0]);
+   $( "#container_speach").text(instruction[event_]["e0"][0]);
+   console.log("sleeping...")
+   sleep(6000);
+   replace_screen(instruction[event_]["e1"][2]);
+   $( "#marketing_headline" ).text(marketing[event_]["e1"][0]);
+   $( "#marketing_text" ).text(marketing[event_]["e1"][1]);
+   $( "#speaker" ).text(instruction[event_]["e1"][1][0]);
+   $( "#container_speach").text(instruction[event_]["e1"][0]);
+   update_asset_status(event_nr);
+   
+   console.log("sleeping...")
+   sleep(6000);
+   replace_screen(instruction[event_]["e2"][2]);
+   $( "#marketing_headline" ).text(marketing[event_]["e2"][0]);
+   $( "#marketing_text" ).text(marketing[event_]["e2"][1]);
+   $( "#speaker" ).text(instruction[event_]["e2"][1][0]);
+   $( "#container_speach").text(instruction[event_]["e2"][0]);
+   //update the rasp, asset installed
+   $.ajax({
+            type: 'GET',
+            url: "/asset_installed/",
+            data: 0,
+            success: function (data) {
+              
+             }
+        });
+   
+}
 
 // Reset all Values, event number and rfid number of the asset as input variables
 function reset_all_texts(event_nr, esset_rfid_id, fint_nr){
 //event 8 does not change any instructions/marketing or speaker
 if (!(event_nr==8)){
     var event_="event"+event_nr.toString();
+    if (event_nr==2){
+    install_pump(event_);
+    }
+    else{
 	replace_marketing(event_);
 	replace_instruction(event_);
 	update_asset_status(event_nr);
+	}
 	//
 	if(!(esset_rfid_id==0) && !(event_nr==1) ){
 	    var asset = "a"+esset_rfid_id.toString();
@@ -102,7 +166,7 @@ if (!(event_nr==8)){
 	}else{
 	//display hints for event 8
 	if (fint_nr>0){
-	   display_hint(fint_nr);
+	  // display_hint(fint_nr);
 	}	
 	}
 }
@@ -135,8 +199,8 @@ console.log("starting...");
 $( document ).ready(function() {
 	console.log("document loaded");
 	//test
-	reset_all_texts(0, 0);
-	
+	//reset_all_texts(0, 0, 0);
+	screen_mode("screenshot");
 	if ("WebSocket" in window){
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            //var ws = new WebSocket("ws://0.0.0.0:5000/websocket"); 
@@ -150,7 +214,7 @@ $( document ).ready(function() {
               event_nr=event.event;
               esset_rfid_id=event.asset_rfid_id;
               hint_nr=event.hint;
-              reset_all_texts(event_nr, esset_rfid_id,hint_nr);
+              reset_all_texts(event_nr, esset_rfid_id, hint_nr);
               //alert("Hallo");
               //jQuery("#container_speach").html(evt.data);
            }
@@ -184,6 +248,15 @@ $("#button_stop").click(function(evt) {
   location.reload();
      });
    */  
+
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
 //STOP EXECUTION ON RELOAD 
 window.onbeforeunload = function(event){ 
            stop_demo();

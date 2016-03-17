@@ -3,6 +3,9 @@
 EVENTS
 1 - installation of  a new aset
 2 - new asset installed, show new asset information
+  2.e0 - asset registration
+  2.e1 - asset synchronisation
+  2.e2 - asset synchronisation Manufacturer responce
 3 - Asset is brocken
 4 - new update service Bulletin
 5 - Asset repaired
@@ -22,9 +25,13 @@ EVENTS
 // Marketing Arrays [HEADLINE, TEXT] //
  marketing = {}; 
  //initial marketing
- marketing.event0  = ["Welcome", "AIN is really great because the installation of new assets is really simple. You just connect your device to the network and all the necessary data is directly pulled from the manufacturer. No more need for updates and no more fear of using outdated software. With AIN you are always on the safe side!"];
- marketing.event1 = ["Installation of a new asset", "AIN is really great because the installation of new assets is really simple. You just connect your device to the network and all the necessary data is directly pulled from the manufacturer. No more need for updates and no more fear of using outdated software. With AIN you are always on the safe side!"];
- marketing.event2 = ["Asset Installed"," Marketting Asset Installed"];
+ marketing.event0 = ["Connecting Operators and Manufacturers", "The Asset Intelligence Network is a great product to share inforamtion between all participants. Move the yellow Lego objects to see what is possible."];
+ marketing.event1 = ["Connecting Operators and Manufacturers", "The Asset Intelligence Network is a great product to share inforamtion between all participants. Move the yellow Lego objects to see what is possible."];
+ marketing.event2 = {}
+ marketing.event2.e0=["New Asset Installation", "Registering new assets with the manufacturer has never been easier. Simply scan the code on the machine and sync the data between you and the manufacturer."];
+ marketing.event2.e1=["New Asset Installation", "Synching usage data between operators and manufacturers offers entirely new business models, such as Asset as a Service, on the manufacturer side. For the operator it guarantees best possible service and maintenance before assets break."];
+ marketing.event2.e2=["New Asset Installation", "Synching usage data between operators and manufacturers offers entirely new business models, such as Asset as a Service, on the manufacturer side. For the operator it guarantees best possible service and maintenance before assets break."];
+
  marketing.event3 = ["Repairing of a broken machine", "Information about how to repari a broken machine can be shared"];
  marketing.event4 = ["Issue of a service bulletin","Whenever there is an update from the manufacturer, all operators get notified"];
  marketing.event5 = ["Repaired", "Information about how to repari a broken machine can be shared"];
@@ -33,15 +40,21 @@ EVENTS
  
 // Speaker arrays [Name, Mini-figure image name] //
 speaker = {};
-speaker.manufacturer=["Manufacturer", "minifigure2.png"];
-speaker.operator=["Operator", "minifigure1.png"];
-speaker.service=["Service provider", "minifigure3.png"];
+speaker.manufacturer=["Manufacturer", "minifigure1.png"];
+speaker.operator=["Operator", "minifigure3.png"];
+speaker.service=["Service provider", "minifigure2.png"];
 
 // Instruction arrays [Text] //
 instruction = {};
 instruction.event0 = ["Here you will see the instructions for the asset handling",speaker.manufacturer];
-instruction.event1 = ["Operator can by an asset by choosing the desired asset and placing it on the operators facilities",speaker.manufacturer];
-instruction.event2 = ["Wow, the asset is installed",speaker.operator];
+instruction.event1 =["I need a new pump. Let’s get one from the factory and place it on my plant.",speaker.operator, "img1.png"];
+
+//Installation
+instruction.event2 = {};
+instruction.event2.e0 =["Nice Seawater Pump! I’ll connect it to the Manufacturer’s network.",speaker.operator, "img1.png"];
+instruction.event2.e1 =["Nice Seawater Pump! I’ll connect it to the Manufacturer’s network.",speaker.operator, "img2.png"];
+instruction.event2.e2 =["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, "img2.pmg"];
+
 instruction.event3 = ["Your asset is broken! IN order to repair it place the service-car on the operator's platform",speaker.service];
 instruction.event4 = ["New update is issued to the service bulletin", speaker.manufacturer];
 instruction.event5 = ["Enjoy your asset, it is repaired and working well",speaker.service];

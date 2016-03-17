@@ -19,6 +19,7 @@ class Operator(Participant):
           
      def buy_asset(self, manufacturer, main_queue):
         blinker_Queue=Participant.blink_service(self.GPIO_out,0.5, main_queue)
+        #event 1 - need to buy an asset
         Participant.update_event(1)
         #Participant.speak("Operator", "I need to buy a new pump!")
         #print "Operator: I need to buy a new pump!"
@@ -28,12 +29,12 @@ class Operator(Participant):
         self.Asset.set_next_pimp_reminder()
         #print("next update time is set")
         print str(manufacturer.Bulletin_at_campus)
-        manufacturer.check_bulletin()
+        #manufacturer.check_bulletin()
         #print str(manufacturer.Service_Bulletin_GPIO_Measure)
         #print str(manufacturer.Bulletin_at_campus)
-        if not manufacturer.Bulletin_at_campus and not manufacturer.Bulletin.Activated:
+        #if not manufacturer.Bulletin_at_campus and not manufacturer.Bulletin.Activated:
             #hint: in order to activate the bulletin bring it to the manufacturer
-            Participant.update_event(8, hint_id=2)
+            #Participant.update_event(8, hint_id=2)
             #print("To receive new updates verify the bulletin at manufacturers")
         
         self.Asset_is_working=True 
