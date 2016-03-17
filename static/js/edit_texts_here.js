@@ -13,9 +13,9 @@ EVENTS
 // Asset Arrays [ID, MODEL, STATUS, IMAGEFILE], RFID as identifier: e.g. a215 has RFID id 215//
  asset = {};
  asset.a000 = ["none", "none", "unknown", ""];	
- asset.a215 = ["ID 1111 - 1x", "seawater pump", "working", "asset1"];	
- asset.a138 = ["id2", "motor", "installed", "asset2"];
- asset.a133 = ["id3", "battery", "broken", "asset2"];
+ asset.a215 = ["ID 1111 - 1x", "seawater pump", "working", "asset1.png"];	
+ asset.a138 = ["id2", "motor", "installed", "asset2.png"];
+ asset.a133 = ["id3", "battery", "broken", "asset2.png"];
 
 
 // Marketing Arrays [HEADLINE, TEXT] //

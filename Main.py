@@ -59,8 +59,7 @@ SERVICE_BULETTE_CUSTOMER=16
 SERVICE_BULETTE_CUSTOMER_MEASURRE=18
 
 greating="Great choice! You just bought the Asset "
-pygame.display.init()                 
-
+pygame.display.init()     
 
 def get_alife(Manufacturer_GPIO_out,Service_GPIO_out,Operator_GPIO_out):
      print str(Manufacturer_GPIO_out)
@@ -78,7 +77,7 @@ def get_alife(Manufacturer_GPIO_out,Service_GPIO_out,Operator_GPIO_out):
  #Calls GPIO cleanup
  #rdr.cleanup()
 
-
+"""
 def ckeck_if_info_bulletin_in_place(GPIO_place):
    
     a = datetime.datetime.now()
@@ -97,9 +96,10 @@ def ckeck_if_info_bulletin_in_place(GPIO_place):
     else:
          bulletin_in=False
     return bulletin_in
-
+"""
 def main(a,queue):
   try:
+  
    import os
    import tornado.httpserver
    import tornado.ioloop
@@ -137,38 +137,29 @@ def main(a,queue):
    SERVICE_BULETTE_FABRIK=31
    SERVICE_BULETTE_FABRIK_MEASURE=35
    SERVICE_BULETTE_CUSTOMER=32
-   SERVICE_BULETTE_CUSTOMER_MEASURRE=18
-
+   SERVICE_BULETTE_CUSTOMER_MEASURRE=33
+   #GPIO.cleanup()
    Manufacturer=Manufacturer(OUT_manufacturer, service_bulletin_out=SERVICE_BULETTE_FABRIK, service_bullete_measure=SERVICE_BULETTE_FABRIK_MEASURE, bulletin=Bulletin())
    Service=Service(OUT_service)
    Operator=Operator(gpio_out=OUT_operator, service_bulletin_out=SERVICE_BULETTE_CUSTOMER, service_bullete_measure=SERVICE_BULETTE_CUSTOMER_MEASURRE, pimp_gpio=PIMP_GPIO)
+   GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.LOW)
+   GPIO.output(Manufacturer.Service_Bulletin_GPIO_out, GPIO.LOW)
+ 
  
    GPIO.setup(BREAK_ASSET, GPIO.IN)
-   #speak_start()
    get_alife(Manufacturer.GPIO_out,Service.GPIO_out,Operator.GPIO_out)
-   #time.sleep(3)
-   #WebSocketHandler.send_updates("Hello, I am working")
+   
    Operator.buy_asset(Manufacturer, queue)
-      
-   #bulletin_activation=0
-
-   #GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
-
-   #endless loop
-   #print "runing main"
-   while queue.empty():
   
-    #check if Info Bulletin is plugged in the manufacturer, false by default and if not activated  
+   while queue.empty():
+       
+    """
+        #check if Info Bulletin is plugged in the manufacturer, false by default and if not activated  
     bulletin_in=ckeck_if_info_bulletin_in_place(Manufacturer.Service_Bulletin_GPIO_Measure)
-    
-    
-    
-    
+
     #checking if the Asset is on the RFID reader
     Operator.check_asset()
-    
-    
-    
+ 
     if datetime.datetime.now()>Manufacturer.Next_asset_update and not bulletin_in and not Manufacturer.Bulletin.Activated and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
          Manufacturer.Bulletin.Activated=True
          print ("Bulleting activated, bring it to the operator")
@@ -209,17 +200,36 @@ def main(a,queue):
          
     if GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Operator.Informed_about_recent_update and not Operator.Asset.Brocken:
          Operator.Informed_about_recent_update=False
+    """
+    ##BULLETIN HANDLING###  
+    if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin.Activated and not Operator.Asset.Brocken and Operator.Has_asset:
+         Manufacturer.Bulletin.Activated=True
+         Manufacturer.Bulletin_at_campus=True
+         print ("Bulleting activated, bring it to the operator")
+         Manufacturer.activate_bulletin(queue)
          
+    if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
+         Manufacturer.activate_bulletin(queue)
+         Manufacturer.Bulletin_at_campus=True
+        
+    if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
+         Manufacturer.deactivate_bulletin()
+         Manufacturer.Bulletin_at_campus=False
+         
+    if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
+         print "Informing"
+         Manufacturer.inform_operator_about_Update(Operator)
+    ##END BULLETIN HANDLING###  
+    
     #manually break the asset
     if GPIO.input(BREAK_ASSET)==1:
          Operator.Asset_is_working=False
        
     if not Operator.Has_asset:
              #print "No Asset"
-             if Manufacturer.Bulletin.Activated:
-               Manufacturer.deactivate_bulletin()
-             print ("Bulleting deactivating")
-             Manufacturer.Bulletin.Activated=False
+             #if Manufacturer.Bulletin.Activated:
+              # Manufacturer.deactivate_bulletin()
+             #print ("Bulleting deactivating")
              Operator.buy_asset(Manufacturer, queue)
              #Operator.Asset.set_next_break()   
              
@@ -248,7 +258,7 @@ def main(a,queue):
       if Operator.Asset.Pimped:
         Operator.unpimp_the_pump()
         
-   print "stoping" 
+   print "stoped"
    #blinker_Queue.put("stop")
    #Participant.stop_blink_service(Manufacturer.blinker_Queue)  
    #Participant.stop_blink_service(blinker_Queue)
@@ -276,16 +286,15 @@ def check_ready_to_start():
     return (ready, msg)
 
 class StartHandler(tornado.web.RequestHandler):
-    
      def get(self):
             #GPIO.cleanup()
-            #GPIO.setmode(GPIO.BOARD)
+            GPIO.setmode(GPIO.BOARD)
             global qu
             global main_thread
             #print("button click")
             #check if everythings in place
             (ready, msg)=check_ready_to_start()
-            if ready:
+            if threading.active_count()<4:
               qu=Queue()
               main_thread=threading.Thread(target=main, args=(1,qu))
               main_thread.daemon = True
@@ -300,6 +309,11 @@ class StopHandler(tornado.web.RequestHandler):
             print "Attempting to stop"
             try:
               qu.put("Stop")
+              print str(threading.enumerate())
+              #while threading.active_count()>1:
+               # print threading.active_count()
+              
+              
             except NameError:
               print "nothing to stop"
      

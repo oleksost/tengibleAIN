@@ -6,6 +6,7 @@ import RFID
 import Pump
 import json
 from Webserver import WebSocketHandler
+GPIO.setmode(GPIO.BOARD)
 
 class Participant(object):
     """

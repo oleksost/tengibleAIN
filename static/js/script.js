@@ -30,7 +30,7 @@ function replace_asset(asset_){
 	$( "#twin_model" ).text(asset[asset_][1]);
 	$( "#twin_status" ).text(asset[asset_][2]);
 	if (!(asset_=="a000")){
-	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][3]+".gif"); 
+	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][3]);  
 	}else {$( "#asset_image" ).attr('src', "");}
 }
 
@@ -78,9 +78,20 @@ function stop_demo(){
             type: 'GET',
             url: "/stop/",
             data: 0,
+            async: false,
             success: function (data) {
               
              }
+        });
+}
+function start_demo(){
+console.log("starting...");
+     $.ajax({
+            type: 'GET',
+            url: "/start/",
+            success: function (data) {            
+              
+            }
         });
 }
 
@@ -88,12 +99,15 @@ function stop_demo(){
 $( document ).ready(function() {
 	console.log("document loaded");
 	//test
-	//reset_all_texts(0, 0);
+	reset_all_texts(0, 0);
+	
 	if ("WebSocket" in window){
            //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
-           var messagecount = 0
+           var messagecount = 0;
+           start_demo();
            ws.onmessage = function(evt) {
+              
               messagecount += 1;
               //jQuery(".hold").attr('id','pieSlice' + evt.data);
               var event = JSON.parse(evt.data);
@@ -116,7 +130,7 @@ $( document ).ready(function() {
 });
 
 //START THE DEMO
-$("#button_start").click(function(evt) {
+/*$("#button_start").click(function(evt) {
     console.log("starting...");
      $.ajax({
             type: 'GET',
@@ -126,27 +140,11 @@ $("#button_start").click(function(evt) {
                $('#button_start').on('click.mynamespace', function() { alert("Alrteady running")});
             }
         });
-     });
+     });*/
 
 $("#button_stop").click(function(evt) {
-     $.ajax({
-            type: 'GET',
-            url: "/stop/",
-            success: function (data) {
-               $('#button_start').off('click');
-               $('#button_start').on('click.mynamespace', function() { 
-                $.ajax({
-            type: 'GET',
-            url: "/start/",
-            data: 1,
-            success: function (data) {            
-               $('#button_start').off('click');
-               $('#button_start').on('click.mynamespace', function() { alert("Alrteady running")});
-            }
-        });
-               });
-             }
-        });
+  console.log("reloading");
+  location.reload();
      });
      
 //STOP EXECUTION ON RELOAD 
