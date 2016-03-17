@@ -1,7 +1,7 @@
 import time
 import RPi.GPIO as GPIO
 from multiprocessing import Process, Queue
-import pygame
+#import pygame
 import RFID
 import Pump
 import json
@@ -29,10 +29,11 @@ class Participant(object):
           GPIO.setup(service_bulletin_out, GPIO.OUT)
           GPIO.setup(service_bullete_measure, GPIO.IN)
     @classmethod
-    def update_event(cls, event, asset_rfid_id=0):
+    def update_event(cls, event, asset_rfid_id=0, hint_id=0):
        data = {}
        data['event'] = event
        data['asset_rfid_id'] = asset_rfid_id
+       data['hint'] = hint_id
        json_data = json.dumps(data)
        WebSocketHandler.send_updates(json_data)
     

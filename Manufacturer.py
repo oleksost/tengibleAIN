@@ -2,6 +2,7 @@ from Participant import Participant
 from Bulletin import Bulletin
 import datetime
 import time
+import random
 import RPi.GPIO as GPIO
 from Webserver import WebSocketHandler
 
@@ -37,7 +38,7 @@ class Manufacturer(Participant):
         #self.set_next_asset_update_time()
       
       def set_next_asset_update_time(self):
-         self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=10)
+         self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=random.randint(10, 20))
          
       def inform_operator_about_Update(self, operator):
          Participant.update_event(4)

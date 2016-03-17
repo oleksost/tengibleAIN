@@ -7,6 +7,7 @@ EVENTS
 5 - Asset repaired
 6 - asset can be pimped 
 7 - Asset is pimped
+8 - display a new hint
 */
 
 var initial_asset = "a0";
@@ -28,18 +29,39 @@ function replace_asset(asset_){
     console.log(asset_);
 	$( "#twin_id" ).text(asset[asset_][0]);
 	$( "#twin_model" ).text(asset[asset_][1]);
-	$( "#twin_status" ).text(asset[asset_][2]);
+	//$( "#twin_status" ).text(asset[asset_][2]);
 	if (!(asset_=="a000")){
-	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][3]);  
-	}else {$( "#asset_image" ).attr('src', "");}
+	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][2]);  
+	}else 
+	   {
+       //TODO: IMAGE FOR THE EVENT 000
+           $( "#asset_image" ).attr('src', "");
+       }
 }
 
+//updating the asset status
+function update_asset_status(event){
+switch (event){
+       case 3:  
+              $( "#twin_status" ).text("broken");
+              break;
+       case 2:  
+              $( "#twin_status" ).text("working");
+              break;  
+       case 5:  
+              $( "#twin_status" ).text("working");
+              break; 
+              
+    }
+    
+       
+}
 
 // Replace the Instructions and the speaker
 function replace_instruction(event_){
 	$( "#container_speach").text(instruction[event_][0]);
 	//replace the speaker
-	console.log(instruction[event_][1][0]);
+	console.log(instruction[event_][1]);
 	$( "#speaker" ).text(instruction[event_][1][0]);
 	//replace the speaker's image
 	$( "#container_minifigure" ).css('background-image', "url(static/img/"+instruction[event_][1][1]);
@@ -51,15 +73,23 @@ function replace_iframe(current_url){
 	$("#ain").attr('src', current_url); 
 }
 
+function display_hint(fint_nr){
+  var hint = "h"+fint_nr.toString();
+  $( "#hints" ).text(hints[hint][0]); 
+  //console.log(hints[hint][0]);
+}
 
 
 // Reset all Values, event number and rfid number of the asset as input variables
-function reset_all_texts(event_nr, esset_rfid_id){
+function reset_all_texts(event_nr, esset_rfid_id, fint_nr){
+//event 8 does not change any instructions/marketing or speaker
+if (!(event_nr==8)){
     var event_="event"+event_nr.toString();
 	replace_marketing(event_);
 	replace_instruction(event_);
+	update_asset_status(event_nr);
+	//
 	if(!(esset_rfid_id==0) && !(event_nr==1) ){
-	
 	    var asset = "a"+esset_rfid_id.toString();
 	    replace_asset(asset);    
 	}else if (event_nr==1 || event_nr==0){
@@ -69,6 +99,12 @@ function reset_all_texts(event_nr, esset_rfid_id){
 	}
 	//replace_iframe(initial_url);
 	console.log("all texts reset");
+	}else{
+	//display hints for event 8
+	if (fint_nr>0){
+	   display_hint(fint_nr);
+	}	
+	}
 }
     
 
@@ -102,8 +138,8 @@ $( document ).ready(function() {
 	reset_all_texts(0, 0);
 	
 	if ("WebSocket" in window){
-           //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
+           //var ws = new WebSocket("ws://0.0.0.0:5000/websocket"); 
            var messagecount = 0;
            start_demo();
            ws.onmessage = function(evt) {
@@ -113,7 +149,8 @@ $( document ).ready(function() {
               var event = JSON.parse(evt.data);
               event_nr=event.event;
               esset_rfid_id=event.asset_rfid_id;
-              reset_all_texts(event_nr, esset_rfid_id);
+              hint_nr=event.hint;
+              reset_all_texts(event_nr, esset_rfid_id,hint_nr);
               //alert("Hallo");
               //jQuery("#container_speach").html(evt.data);
            }
@@ -141,12 +178,12 @@ $( document ).ready(function() {
             }
         });
      });*/
-
+/*
 $("#button_stop").click(function(evt) {
   console.log("reloading");
   location.reload();
      });
-     
+   */  
 //STOP EXECUTION ON RELOAD 
 window.onbeforeunload = function(event){ 
            stop_demo();
