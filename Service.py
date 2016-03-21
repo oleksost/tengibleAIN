@@ -14,4 +14,4 @@ class Service(Participant):
         #Participant.speak("Service", "Congratulations, you repaired the Asset!")
         operator.Asset_is_working=True
         #update the time for the next random break
-        operator.Asset.set_next_break()    
+        operator.Asset.set_next_break()

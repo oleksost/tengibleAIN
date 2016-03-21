@@ -13,9 +13,28 @@ EVENTS
 8 - display a new hint
 */
 
-var initial_asset = "a0";
-var initial_marketing = "event0";
-var initial_instruction = "event0";
+var paused=false;
+var timeout;
+var current_asset;
+var current_event;
+var last_image="";
+var current_speaker="";
+var last_animation_ready=true;
+var cerrent_instruction="";
+
+/*
+function wait(ms){
+   var start = new Date().getTime();
+   var end = start;
+   while(end < start + ms) {
+     end = new Date().getTime();
+  }
+}
+*/
+
+//var initial_asset = "a0";
+//var initial_marketing = "event0";
+//var initial_instruction = "event0";
 //var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
 
 // Switch between iFrame and screenshots
@@ -38,9 +57,30 @@ function screen_mode(mode){
 
 
 // Replace Text of Marketing
-function replace_marketing(event_){
+function replace_marketing(event_,subevent){
+// fade out
+
+
+  $( "#marketing_text" ).animate({
+    opacity: 0,
+  }, 500, function() {
+  // Animation complete
+  
+    if (event_=="event2"){
+     $( "#marketing_headline" ).text(marketing[event_][subevent][0]);
+     $( "#marketing_text" ).text(marketing[event_][subevent][1]);
+    
+    }else{
 	$( "#marketing_headline" ).text(marketing[event_][0]);
 	$( "#marketing_text" ).text(marketing[event_][1]);
+    }
+  
+    // fade in
+ $( "#marketing_text" ).animate({
+    opacity: 1,
+  }, 500);
+  
+  });
 }
 
 // Replace Text of Digital Twin
@@ -49,13 +89,17 @@ function replace_asset(asset_){
 	$( "#twin_id" ).text(asset[asset_][0]);
 	$( "#twin_model" ).text(asset[asset_][1]);
 	//$( "#twin_status" ).text(asset[asset_][2]);
-	if (!(asset_=="a000")){
-	$( "#asset_image" ).attr('src', "static/img/"+asset[asset_][2]);  
-	}else 
-	   {
+	//if (!(asset_=="a000")){
+	$( "#asset_image" ).attr('src', asset[asset_][2]);
+	//}else 
+	  // {
        //TODO: IMAGE FOR THE EVENT 000
-           $( "#asset_image" ).attr('src', "");
-       }
+       //    $( "#asset_image" ).attr('src', "");
+       //}
+}
+
+function replace_asset_boosted(asset_){
+$( "#asset_image" ).attr('src', asset[asset_][3]);
 }
 
 //updating the asset status
@@ -63,12 +107,23 @@ function update_asset_status(event){
 switch (event){
        case 3:  
               $( "#twin_status" ).text("broken");
+              //console.log("setting class "+" error");
+              $( "#twin_status" ).css("color","#f94865");
+              //$( "#twin_status" ).toggleClass("error");
               break;
+       case 5: 
        case 2:  
               $( "#twin_status" ).text("working");
+              $( "#twin_status" ).css("color","#44ef69");
+              //console.log("setting class "+" working");
+              //$( "#twin_status" ).toggleClass("working");
               break;  
-       case 5:  
-              $( "#twin_status" ).text("working");
+       case 1:  
+       case 0:  
+              $( "#twin_status" ).text("...");
+              $( "#twin_status" ).css("color","#fff");
+              //console.log("setting class "+" neutral");
+              //$( "#twin_status" ).toggleClass("neutral");
               break; 
               
     }
@@ -76,16 +131,73 @@ switch (event){
        
 }
 
-// Replace the Instructions and the speaker
-function replace_instruction(event_){
-	$( "#container_speach").text(instruction[event_][0]);
-	//replace the speaker
-	console.log(instruction[event_][1]);
-	$( "#speaker" ).text(instruction[event_][1][0]);
-	//replace the speaker's image
-	$( "#container_minifigure" ).css('background-image', "url(static/img/"+instruction[event_][1][1]);
-	
+
+function replace_minifigure(event_, speaker){
+ //EVENT2 HAS SUBEVENTS
+    // fade out
+    $( "#minifigure_image" ).animate({
+       opacity: 0,
+       "margin-left": "-50",
+     }, 500, function() {
+       // Animation complete -> Replace image
+
+           //EVENT2 HAS SUBEVENTS
+           $( "#minifigure_image" ).attr('src', speaker);
+           // fade in minifigure
+           $( "#minifigure_image" ).animate({
+           opacity: 1,
+           "margin-left": "0",
+           }, 500, function(){
+           // fade in speech container
+           $( "#container_speach" ).animate({
+                   opacity: 1,
+           }, 500, function(){ 
+                                   last_animation_ready=true;     
+                             });
+  
+                           });
+  
+                       });
+                       
+                              
+                        
 }
+
+
+// Replace the Instructions and the speaker
+function replace_instruction(event_, subevent){
+
+   // fade out
+  //last_animation_ready=false;
+  $( "#container_speach" ).animate({
+    opacity: 0,
+  }, 500, function() {
+  // Animation complete
+  	if (event_=="event2"){
+                 var minifigure=instruction[event_][subevent][2][1];
+                   	 $( "#container_speach").text(instruction[event_][subevent][0]+ asset["a"+current_asset.toString()][1] +instruction[event_][subevent][1]);
+  	                 $( "#speaker" ).text(instruction[event_][subevent][2][0]);
+                     //cerrent_instruction=instruction[event_][subevent][0];
+           }else{
+                  var minifigure=instruction[event_][1][1];
+                     $( "#container_speach").text(instruction[event_][0]);
+  	                 $( "#speaker" ).text(instruction[event_][1][0]);
+  	                 //cerrent_instruction=instruction[event_][0];
+           }
+           
+           if (!(minifigure==current_speaker)){
+           current_speaker=minifigure;
+           replace_minifigure(event_, minifigure);
+           }else{
+           //last_animation_ready=true;
+            $( "#container_speach" ).animate({
+                   opacity: 1,
+             }, 500);
+               }
+
+     });           
+}
+
 
 // Replace Source of iFrame
 function replace_iframe(current_url){
@@ -97,32 +209,49 @@ function display_hint(fint_nr){
   $( "#hints" ).text(hints[hint][0]); 
   //console.log(hints[hint][0]);
 }
-function replace_screen(img){
-
-
+function replace_screen(src){
+if (!(last_image==src)){
+    $( "#screenshot" ).attr('src', src);
+    //$( "#screenshot" ).attr('src', img);
+    last_image=src; 
+}
 }
 
 
 //TODO_: implement this function in a loop
-function install_pump(event_){
-   //console.log(instruction[event_]["e1"][2]);
-   replace_screen(instruction[event_]["e0"][2]);
-   $( "#marketing_headline" ).text(marketing[event_]["e0"][0]);
-   $( "#marketing_text" ).text(marketing[event_]["e0"][1]);
-   $( "#speaker" ).text(instruction[event_]["e0"][1][0]);
-   $( "#container_speach").text(instruction[event_]["e0"][0]);
+function install_pump(event_,asset_rfid_id){
+     var asset_ = "a"+asset_rfid_id.toString();
+     console.log("setting current_asset "+asset_);
+     current_asset=asset_rfid_id;
+	 replace_asset(asset_);   
+     replace_marketing(event_,"e0");
+     replace_instruction(event_,"e0");
+     replace_screen(instruction[event_]["e0"][3]);
+     console.log("sleeping...")
+     timeout = setTimeout(function(){install_pump_e1(event_);}, 15000);
+
+}
+
+
+function install_pump_e1(event_){
+    replace_marketing(event_,"e1");
+    replace_screen(instruction[event_]["e1"][3]);
+    console.log("setting asset installed");
+    $.ajax({
+            type: 'GET',
+            url: "/asset_installed/",
+            //data: 0,
+            //async: false,
+            success: function (data) {
+              
+             }
+        });
+   }
+/*
+function install_pump_e2(event_){
    console.log("sleeping...")
-   sleep(6000);
-   replace_screen(instruction[event_]["e1"][2]);
-   $( "#marketing_headline" ).text(marketing[event_]["e1"][0]);
-   $( "#marketing_text" ).text(marketing[event_]["e1"][1]);
-   $( "#speaker" ).text(instruction[event_]["e1"][1][0]);
-   $( "#container_speach").text(instruction[event_]["e1"][0]);
-   update_asset_status(event_nr);
-   
-   console.log("sleeping...")
-   sleep(6000);
-   replace_screen(instruction[event_]["e2"][2]);
+   //wait(6000);
+   //replace_screen(instruction[event_]["e2"][2]);
    $( "#marketing_headline" ).text(marketing[event_]["e2"][0]);
    $( "#marketing_text" ).text(marketing[event_]["e2"][1]);
    $( "#speaker" ).text(instruction[event_]["e2"][1][0]);
@@ -138,49 +267,90 @@ function install_pump(event_){
         });
    
 }
+*/
 
-// Reset all Values, event number and rfid number of the asset as input variables
-function reset_all_texts(event_nr, esset_rfid_id, fint_nr){
+function reset_all_texts(event_nr, asset_rfid_id){
 //event 8 does not change any instructions/marketing or speaker
-if (!(event_nr==8)){
-    var event_="event"+event_nr.toString();
-    if (event_nr==2){
-    install_pump(event_);
-    }
-    else{
-	replace_marketing(event_);
+var event_="event"+event_nr.toString();
+switch (event_nr){
+case 8:
+     break;
+case 2:
+     install_pump(event_, asset_rfid_id);
+     update_asset_status(event_nr);
+     break;
+case 10:
+     replace_instruction(event_);
+     break;
+
+case 6:
+    var asset_ = "a"+asset_rfid_id.toString();
+    $("#asset_image").one("load", function() {
+        replace_marketing(event_);
+	    replace_instruction(event_);
+	    update_asset_status(event_nr);
+	    $( "#screenshot" ).attr('src', instruction[event_][2]);
+     }).attr("src", asset[asset_][3]);
+       break;
+case 7:
+ var asset_ = "a"+asset_rfid_id.toString();
+ $("#asset_image").one("load", function() {
+    //replace_asset_boosted(asset_);
+     //$("#screenshot").one("load", function() {
+	   //replace_marketing(event_);
+	   replace_instruction(event_);
+	   update_asset_status(event_nr);
+	   replace_screen(instruction[event_][2]);
+	   $( "#screenshot" ).attr('src', instruction[event_][2]);
+       //replace_asset(asset_);
+     //}).attr("src", "static/img/"+ instruction[event_][2]);
+   }).attr("src", asset[asset_][2]);
+       break;
+case 3:
+      replace_marketing(event_);
+	  replace_instruction(event_);
+	  update_asset_status(event_nr);
+	  break;
+case 5:
+      replace_instruction(event_);
+      update_asset_status(event_nr);
+      break;
+case 1:
+      //no asset on the rfid 
+	  var asset_ = "a"+"000";
+	  update_asset_status(event_nr);
+	  replace_asset(asset_);
+	  replace_marketing(event_);
+	  replace_instruction(event_);
+	  console.log(instruction[event_][2]); 
+	  replace_screen(instruction[event_][2]);
+      break;
+case 0:
+      //INNITIAL SETUP
+	  var asset_ = "a"+"000";
+	  update_asset_status(event_nr);
+	  replace_instruction(event_);
+	  replace_screen(instruction[event_][2]);
+      break;
+default:
+    replace_marketing(event_);
 	replace_instruction(event_);
 	update_asset_status(event_nr);
-	}
-	//
-	if(!(esset_rfid_id==0) && !(event_nr==1) ){
-	    var asset = "a"+esset_rfid_id.toString();
-	    replace_asset(asset);    
-	}else if (event_nr==1 || event_nr==0){
-	//is no asset on the rfid
-	    var asset_ = "a"+"000";
-	    replace_asset(asset_);
-	}
-	//replace_iframe(initial_url);
-	console.log("all texts reset");
-	}else{
-	//display hints for event 8
-	if (fint_nr>0){
-	  // display_hint(fint_nr);
-	}	
-	}
-}
+	replace_screen(instruction[event_][2]);  
     
+} 
+console.log("all texts reset");
+}
 
-//STOP DEMO
 function stop_demo(){
+        $("#container_speach").text("stopping...");
         $.ajax({
             type: 'GET',
             url: "/stop/",
             data: 0,
             async: false,
             success: function (data) {
-              
+             $("#container_speach").text("stopped");
              }
         });
 }
@@ -198,25 +368,27 @@ console.log("starting...");
 // INITIAL SETUP
 $( document ).ready(function() {
 	console.log("document loaded");
+	//start_demo();
 	//test
 	//reset_all_texts(0, 0, 0);
 	screen_mode("screenshot");
 	if ("WebSocket" in window){
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
-           //var ws = new WebSocket("ws://0.0.0.0:5000/websocket"); 
+           //var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
            var messagecount = 0;
            start_demo();
            ws.onmessage = function(evt) {
-              
               messagecount += 1;
-              //jQuery(".hold").attr('id','pieSlice' + evt.data);
               var event = JSON.parse(evt.data);
               event_nr=event.event;
               esset_rfid_id=event.asset_rfid_id;
-              hint_nr=event.hint;
-              reset_all_texts(event_nr, esset_rfid_id, hint_nr);
-              //alert("Hallo");
+              
+              if(!(current_event==event_nr)){
+              reset_all_texts(event_nr, esset_rfid_id);
+              current_event=event_nr;
               //jQuery("#container_speach").html(evt.data);
+              }
+              
            }
            ws.onopen = function() {
               messagecount = 0;
@@ -242,21 +414,35 @@ $( document ).ready(function() {
             }
         });
      });*/
-/*
-$("#button_stop").click(function(evt) {
-  console.log("reloading");
+
+$("#button_reset").click(function(evt) {
+  stop_demo();
+  $("#container_speach").text("reloading...");
   location.reload();
      });
-   */  
+  
+$("#button_next").click(function(evt) {
+        if(current_event==2){
+        console.log("clearing");
+        //paused=true;
+        clearTimeout(timeout);
+        //var event_="event"+current_event.toString();
+        install_pump_e1("event2");
+        }
+     });
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
-}
+$("#button_previous").click(function(evt) {
+
+       if(current_event==2){
+        console.log("clearing");
+        //paused=true;
+        //clearTimeout(timeout);
+        //var event_="event"+current_event.toString();
+        install_pump("event2",current_asset);
+        }
+     });
+
+
 //STOP EXECUTION ON RELOAD 
 window.onbeforeunload = function(event){ 
            stop_demo();

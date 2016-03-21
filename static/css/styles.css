@@ -34,10 +34,17 @@ body{
 }
 
 div{
-	/*border: 1px dashed #333333;*/
 	display: inline-block;
 	}
 
+/*
+
+div, img{
+		border: 1px dashed #333333;
+
+}
+
+*/
 
 /* ------ CONTROLS -------- */
 
@@ -67,7 +74,7 @@ div{
 	font-family: sap_icons;
 	font-size: 1.5rem;
 	color:#B1BFC7;
-	text-shadow: 0px -1px 0px #333333;
+	text-shadow: 0px -1px 2px #333333;
 
 /*not selectable */
  -webkit-touch-callout: none; /* iOS Safari */
@@ -81,6 +88,8 @@ div{
 
 .icon_button:hover{
 	color: #ffffff;
+	text-shadow: 0px 0px 3px #B1BFC7;
+
 	}
 
 
@@ -217,12 +226,16 @@ div{
 #container_minifigure{
 	width: 40%;
 	min-width: 5rem;
-	min-height: 10rem;
-	background-image: url('../img/minifigure3.png');
-	background-repeat: no-repeat;
-	background-position: bottom center;
-	background-size: contain;
+	min-height: 5rem;
+	max-height: 10rem;
 	float: left;
+	text-align: center;
+}
+
+#minifigure_image{
+	max-width: 70%;
+	max-height: 100%;
+
 }
 
 #container_speach{
@@ -279,8 +292,15 @@ div{
 .font_medium{
 	font-family: BentonSans_Medium, Arial, Verdana, sans-serif;
 }
-
-
+.error{
+	color: #f94865;
+}
+.neutral{
+	color: #fff;
+}
+.working{
+	color: #44ef69;
+}
 
 
 
@@ -304,6 +324,7 @@ div{
 
 	#title{
 		font-size: 2rem;
+		
 	}
 
 	.headline{

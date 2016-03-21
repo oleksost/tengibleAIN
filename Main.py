@@ -29,7 +29,8 @@ import RFID
 
 # RPi.GPIO Layout verwenden (wie Pin-Nummern)
 GPIO.setmode(GPIO.BOARD)
-ASSET_INSTALLED=False
+global ASSET_INSTALLED
+
 #EVENTS
 #1 - installation of  a new aset
 #2 - new asset installed, show new asset information
@@ -151,6 +152,8 @@ def main(a,queue):
  
    GPIO.setup(BREAK_ASSET, GPIO.IN)
    get_alife(Manufacturer.GPIO_out,Service.GPIO_out,Operator.GPIO_out)
+   
+   Participant.update_event(0)
    Operator.buy_asset(Manufacturer, queue)
    
    #Variables for the service car handling
@@ -163,9 +166,16 @@ def main(a,queue):
    ###keeping track on hints, starting always with an empty hint display####
    current_hint=1
    
+   broken_count_securit=0
+   broken_count_securit_last=0
+   
+   
+   first_pimp=True
+   INFORMED_BULLETIN=False
+   
    
    while queue.empty():
-    print "asset installed: " + str(ASSET_INSTALLED)
+    #print "asset installed: " + str(ASSET_INSTALLED)
     #checking if the Asset is on the RFID reader
     Operator.check_asset()
     
@@ -175,10 +185,11 @@ def main(a,queue):
          Manufacturer.Bulletin.Activated=True
          Manufacturer.Bulletin_at_campus=True
          #activated, bring to the operator
-         Participant.update_event(8, hint_id=6)
-         current_hint=6
+         #Participant.update_event(8, hint_id=6)
+         Participant.update_event(9)
+         #current_hint=6
          Manufacturer.activate_bulletin(queue)
-         reminded_5=False
+         #reminded_5=False
          
       if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
          Manufacturer.activate_bulletin(queue)
@@ -194,25 +205,54 @@ def main(a,queue):
          
       if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
          print "Informing"
+         if not Operator.Informed_about_recent_update:
+             Participant.update_event(4)
+             Operator.Informed_about_recent_update=True
          Manufacturer.inform_operator_about_Update(Operator)
+             
     ##END BULLETIN HANDLING###  
     
-    #manually break the asset
-      if GPIO.input(BREAK_ASSET)==1 and not Operator.Asset.Brocken and Operator.Has_asset:
+    #ASSET BREAK
+    if Operator.Has_asset and ASSET_INSTALLED and Operator.Asset.Pimped and not Operator.Asset.Brocken:
+      if Operator.Asset.Next_Break==0:
+       Operator.Asset.set_next_break()
+      #MANUAL BREAK
+      print broken_count_securit
+      if GPIO.input(BREAK_ASSET)==0:
+         broken_count_securit=0
+         
+      if GPIO.input(BREAK_ASSET)==1:
+         #broken_count_securit_last=1
+         broken_count_securit=broken_count_securit+1
+      if GPIO.input(BREAK_ASSET)==0:
+         broken_count_securit=0
+      if broken_count_securit>10 and not Operator.Asset.Brocken and Operator.Has_asset and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus:
          Operator.Asset_is_working=False
-      #random asset break
-     #if datetime.datetime.now()>Operator.Asset.Next_Break and Operator.Asset_is_working and not Operator.Asset.Brocken and Operator.Has_asset:
-     #           Operator.Asset_is_working=False   
+         broken_count_securit=0
+       
+      #RANDOM ASSET BREAK
+      if not Operator.Asset.Next_Break==0:
+       if datetime.datetime.now()>Operator.Asset.Next_Break and Operator.Asset_is_working and not Operator.Asset.Brocken and Operator.Has_asset:
+         print "not working"
+         Operator.Asset_is_working=False   
+         
     if not Operator.Has_asset and ASSET_INSTALLED:
              print "No Asset"
              ASSET_INSTALLED=False
+             INFORMED_BULLETIN=False
+             Informed_about_recent_update=False
+             Operator.Asset.Next_Pimp=0
+             Operator.Asset.Next_Break=0
+             first_pimp=True
+             
              #if Manufacturer.Bulletin.Activated:
               # Manufacturer.deactivate_bulletin()
              #print ("Bulleting deactivating")
+             Participant.update_event(1)
              Operator.buy_asset(Manufacturer, queue)
              #Operator.Asset.set_next_break()   
              
-    if not Operator.Asset.Brocken and not Operator.Asset_is_working:
+    if not Operator.Asset.Brocken and not Operator.Asset_is_working and ASSET_INSTALLED and Operator.Has_asset:
          Participant.update_event(3)
          Operator.Asset.Brocken=True
          Operator.Asset_not_on_RFID=0
@@ -233,6 +273,7 @@ def main(a,queue):
                #reminded_4=False
                reminded_3=False
                reminded_5=False
+               #INFORMED_BULLETIN=False
                
     if not Operator.Asset.Brocken and GPIO.input(Operator.Asset.GPIO_to_repair)==1 and servicecar_was_at_the_operators_facility:
                #clean the hint notification
@@ -264,27 +305,41 @@ def main(a,queue):
                current_hint=1
     ### END HANDLING THE SERVICE CAR AND REPAIRING THE ASSET##
     
-    if ASSET_INSTALLED:
+    if ASSET_INSTALLED and not Operator.Asset.Brocken and Operator.Has_asset and Manufacturer.Bulletin.Activated:
     ####HANDLING ASSET PIMPING#######
     #remind to pimp the asset
-      if datetime.datetime.now()>Operator.Asset.Next_Pimp and current_hint==1 and not Operator.Asset.Pimped and not reminded_5 and not Operator.Asset.Brocken and Operator.Has_asset:
-              #hint priority handling
-              if current_hint==1 or current_hint==3:
-               Participant.update_event(8, hint_id=5)
-               current_hint=5
-               reminded_5=True
+     if not Manufacturer.Bulletin_at_campus and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0:
+      if first_pimp and Operator.Asset.Next_Pimp==0 and not Operator.Asset.Pimped:
+        print "handle"
+        print Operator.Asset.Pimped
+        Operator.Asset.set_next_pimp_reminder(seconds_=8)
+        
+        #if GPIO.input(Operator.Pimp_GPIO)==1 and not Operator.Asset.Pimped:
+         #      Operator.Asset.Pimped=True
+        if GPIO.input(Operator.Pimp_GPIO)==0:
+               Operator.Asset.Pimped=False 
+      #if datetime.datetime.now()>Operator.Asset.Next_Pimp_first and not Operator.Asset.Next_Pimp_first==0 and not Operator.Asset.Pimped:
+        #remind to pimp the asset
+        #Participant.update_event(10)
+        #first_pimp=False
+      if not Operator.Asset.Next_Pimp==0: 
+       if datetime.datetime.now()>Operator.Asset.Next_Pimp and not Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
+               Participant.update_event(10)
+               Operator.Asset.Next_Pimp=0
+               if first_pimp:
+                first_pimp=False
                
-    ####Pimping the asset
-      if GPIO.input(Operator.Pimp_GPIO)==1 and not Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
+     ####Pimping the asset
+     if GPIO.input(Operator.Pimp_GPIO)==1 and not Operator.Asset.Pimped and not INFORMED_BULLETIN:
                Operator.pimp_the_pump()
-               #clean the hint display
-               Participant.update_event(8, hint_id=1)
-               current_hint=1
+               INFORMED_BULLETIN=True
                
-      if GPIO.input(Operator.Pimp_GPIO)==0 and Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
+               
+     if GPIO.input(Operator.Pimp_GPIO)==0 and Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
                Operator.unpimp_the_pump()
+               INFORMED_BULLETIN=False
                Operator.Asset.set_next_pimp_reminder()
-               reminded_5=False
+               #reminded_5=False
 
    print "stoped"
    
@@ -320,7 +375,8 @@ class StartHandler(tornado.web.RequestHandler):
             #print("button click")
             #check if everythings in place
             (ready, msg)=check_ready_to_start()
-            if threading.active_count()<4:
+            if threading.active_count()<10:
+              print "starting..."
               Main_Queue=Queue()
               main_thread=threading.Thread(target=main, args=(1,Main_Queue))
               main_thread.daemon = True
@@ -334,7 +390,7 @@ class StopHandler(tornado.web.RequestHandler):
             #GPIO.setmode(GPIO.BOARD)
             print "Attempting to stop"
             try:
-              qu.put("Stop")
+              Main_Queue.put("Stop")
               print str(threading.enumerate())
               #while threading.active_count()>1:
                # print threading.active_count()
@@ -368,6 +424,7 @@ application = tornado.web.Application([
 if __name__ == "__main__":
   try:
     global ASSET_INSTALLED
+    ASSET_INSTALLED=False
     tornado.httpserver.HTTPServer.allow_reuse_address = True
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.allow_reuse_address = True

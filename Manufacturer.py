@@ -41,7 +41,6 @@ class Manufacturer(Participant):
          self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=random.randint(10, 20))
          
       def inform_operator_about_Update(self, operator):
-         Participant.update_event(4)
          #WebSocketHandler.send_updates("New data from Service Bulletin")
          GPIO.output(operator.Service_Bulletin_GPIO_out, GPIO.HIGH) 
          time.sleep(2)

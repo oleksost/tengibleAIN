@@ -20,8 +20,16 @@
 <body>
     <div id="title"><span class="font_medium">SAP</span>&nbsp;ASSET INTELLIGENCE NETWORK</div>
 
-    <!--<div id="hints" style="float: right;">Start demo</div>-->
-    
+    <div id="container_navigation">
+        <!-- remove/hide start and stop when no longer needed
+        <div type="button" class="icon_button" id="button_start">&#xe14b;</div>
+        <div type="button" class="icon_button" id="button_stop">&#xe205;</div>-->
+        &nbsp;
+        <div type="button" class="icon_button" id="button_reset">&#xe204;</div>
+        <div type="button" class="icon_button" id="button_previous">&#xe067;</div>
+        <div type="button" class="icon_button" id="button_next">&#xe066;</div>
+
+    </div>
 
 <div id='container_iframe'>
 
@@ -39,12 +47,12 @@
      <!-- Texts -->
     <div id='container_marketing'>
 
-        <div id='marketing_headline' class='headline'>
-            Installation of a new Asset
+           <div id='marketing_headline' class='headline'>
+            New Asset Installation
         </div>
         <div id='marketing_text'>
-            AIN is really great because the installation of new assets is really simple. You just connect your device to the network and all the necessary data is directly pulled from the manufacturer. No more need for updates and no more fear of using outdated software. With AIN you are always on the safe side!
-        </div>
+        The Asset Intelligence Network is a great product to share inforamtion between all participants. Move the yellow Lego objects to see what is possible.
+       </div>
     </div>
        <!-- Virtual Twin -->
     <div id='container_virtual_twin'>
@@ -54,36 +62,38 @@
 
        <!-- image -->
         <div id='container_twin_image'>
-            <img id='asset_image' src='static/img/asset1.png' alt='image of the asset'>
+            <img id='asset_image' src='static/img/asset0.png' alt='No image.'>
         </div>
 
         <!-- data -->
         <div class='twindata'>
         <div class='label'>Equipment:&nbsp;</div>
         <div id='twin_id'>
-            unknown
+           ...
         </div>
           </div>
         <div class='twindata'>
 
         <div class='label'>Model:&nbsp;</div>
         <div id='twin_model'>
-            unknwon
+            ...
         </div>
         </div>
         <div class='twindata'>
             <div class='label'>Status:&nbsp;</div>
-            <div id='twin_status'>
-               unknown
+            <div id='twin_status' class='neutral'>
+                ...
             </div>
         </div>
     </div>
         <!-- Minifigure -->
     <div id='container_instructions'>
-    <div id='speaker' class='headline'>Operator</div>
-    <div id='container_minifigure'></div>
-    <div id='container_speach'>
-       Please buy a new asset for the manufacturer!
+    <div id='speaker' class='headline'>&nbsp;</div>
+    <div id='container_minifigure'>
+         <img id='minifigure_image' src='' alt=''>
+    </div>
+    <div id='container_speach' style="opacity:0">
+       <!--Please buy a new asset for the manufacturer!-->
     </div>
 </div>
 

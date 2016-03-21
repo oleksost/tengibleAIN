@@ -1,7 +1,9 @@
 from Participant import Participant
+from Manufacturer import Manufacturer
 import Pump
-import RFID
+import RFID 
 import RPi.GPIO as GPIO
+import datetime
 
 
 class Operator(Participant):
@@ -20,13 +22,13 @@ class Operator(Participant):
      def buy_asset(self, manufacturer, main_queue):
         blinker_Queue=Participant.blink_service(self.GPIO_out,0.5, main_queue)
         #event 1 - need to buy an asset
-        Participant.update_event(1)
+        #Participant.update_event(1)
         #Participant.speak("Operator", "I need to buy a new pump!")
         #print "Operator: I need to buy a new pump!"
         #while not self.Has_asset:
-        self.Asset=Operator.readRFID(self,manufacturer.Catalog, main_queue)
+        self.Asset=Operator.readRFID(self,manufacturer.Catalog, main_queue, manufacturer)
         manufacturer.set_next_asset_update_time()
-        self.Asset.set_next_pimp_reminder()
+        #self.Asset.set_next_pimp_reminder()
         #print("next update time is set")
         print str(manufacturer.Bulletin_at_campus)
         #manufacturer.check_bulletin()
@@ -39,7 +41,7 @@ class Operator(Participant):
         
         self.Asset_is_working=True 
         self.Asset_not_on_RFID=0
-        self.Asset.set_next_break()
+        #self.Asset.set_next_break()
         
         Participant.asset_bough(self.Asset)
         Participant.stop_blink_service(blinker_Queue)
@@ -52,23 +54,25 @@ class Operator(Participant):
        else:
            self.Asset_not_on_RFID=0
        
-       if self.Asset_not_on_RFID>2 and self.Has_asset:
+       if self.Asset_not_on_RFID>4 and self.Has_asset:
            self.Has_asset=False
            self.Asset_is_working=False     
      
      def pimp_the_pump(self):
         self.Asset.Pimped=True
-        Participant.update_event(6)
+        Participant.update_event(6, self.Asset.RFID_Identifier)
         #Participant.speak("Operator", "Successfully pimped the asset")
       
      def unpimp_the_pump(self):
         self.Asset.Pimped=False
-        Participant.update_event(7)
+        Participant.update_event(7, self.Asset.RFID_Identifier)
         #Participant.speak("Operator", "Unpimped the asset")    
            
      @staticmethod
-     def readRFID(operator, catalog, main_queue):
+     def readRFID(operator, catalog, main_queue, manufacturer):
        bought=False
+       event_updated=False
+       switch_to_event_0=datetime.datetime.now()+datetime.timedelta(seconds=10)
        #global util
        global rdr
        rdr=RFID.RFID()
@@ -77,6 +81,12 @@ class Operator(Participant):
        #util = rdr.util()
        while not operator.Has_asset:
         while True and main_queue.empty():
+         if not switch_to_event_0==0:
+          if datetime.datetime.now()>switch_to_event_0 and not event_updated:
+           event_updated=True
+           Participant.update_event(0)
+           manufacturer.Bulletin.Activated=False
+           switch_to_event_0=0
          (error, tag_type) = rdr.request()
          if not error:
            #print "Tag detected"
