@@ -15,14 +15,15 @@ EVENTS
 
 var paused=false;
 var timeout;
+var installed=true;
 var current_asset;
 var current_event;
 var last_image="";
-var current_speaker="";
+var current_speaker;
 var last_animation_ready=true;
 var cerrent_instruction="";
 
-/*
+
 function wait(ms){
    var start = new Date().getTime();
    var end = start;
@@ -30,7 +31,7 @@ function wait(ms){
      end = new Date().getTime();
   }
 }
-*/
+
 
 //var initial_asset = "a0";
 //var initial_marketing = "event0";
@@ -84,18 +85,18 @@ function replace_marketing(event_,subevent){
 }
 
 // Replace Text of Digital Twin
-function replace_asset(asset_){
+function replace_asset(asset_, pimped){
     console.log(asset_);
 	$( "#twin_id" ).text(asset[asset_][0]);
 	$( "#twin_model" ).text(asset[asset_][1]);
-	//$( "#twin_status" ).text(asset[asset_][2]);
-	//if (!(asset_=="a000")){
-	$( "#asset_image" ).attr('src', asset[asset_][2]);
-	//}else 
-	  // {
-       //TODO: IMAGE FOR THE EVENT 000
-       //    $( "#asset_image" ).attr('src', "");
-       //}
+	if (pimped==true){
+	  $( "#asset_image" ).attr('src', asset[asset_][3]);
+	  $( "#twin_id" ).text(asset[asset_][4]);
+	}else{
+	  $( "#asset_image" ).attr('src', asset[asset_][2]);
+	  $( "#twin_id" ).text(asset[asset_][0]);
+	  
+	}
 }
 
 function replace_asset_boosted(asset_){
@@ -111,14 +112,24 @@ switch (event){
               $( "#twin_status" ).css("color","#f94865");
               //$( "#twin_status" ).toggleClass("error");
               break;
-       case 5: 
+       case 5:
+              $( "#twin_status" ).text("working");
+              $( "#twin_status" ).css("color","#44ef69");
+              //console.log("setting class "+" working");
+              //$( "#twin_status" ).toggleClass("working");
+              break;   
        case 2:  
               $( "#twin_status" ).text("working");
               $( "#twin_status" ).css("color","#44ef69");
               //console.log("setting class "+" working");
               //$( "#twin_status" ).toggleClass("working");
               break;  
-       case 1:  
+       case 1: 
+              $( "#twin_status" ).text("...");
+              $( "#twin_status" ).css("color","#fff");
+              //console.log("setting class "+" neutral");
+              //$( "#twin_status" ).toggleClass("neutral");
+              break; 
        case 0:  
               $( "#twin_status" ).text("...");
               $( "#twin_status" ).css("color","#fff");
@@ -185,7 +196,7 @@ function replace_instruction(event_, subevent){
   	                 //cerrent_instruction=instruction[event_][0];
            }
            
-           if (!(minifigure==current_speaker)){
+           if (!(current_speaker==minifigure)){
            current_speaker=minifigure;
            replace_minifigure(event_, minifigure);
            }else{
@@ -204,11 +215,14 @@ function replace_iframe(current_url){
 	$("#ain").attr('src', current_url); 
 }
 
+/*
 function display_hint(fint_nr){
   var hint = "h"+fint_nr.toString();
   $( "#hints" ).text(hints[hint][0]); 
   //console.log(hints[hint][0]);
 }
+*/
+
 function replace_screen(src){
 if (!(last_image==src)){
     $( "#screenshot" ).attr('src', src);
@@ -219,16 +233,16 @@ if (!(last_image==src)){
 
 
 //TODO_: implement this function in a loop
-function install_pump(event_,asset_rfid_id){
+function install_pump(event_,asset_rfid_id, pimped){
      var asset_ = "a"+asset_rfid_id.toString();
-     console.log("setting current_asset "+asset_);
+     console.log("setting current_asset "+pimped);
      current_asset=asset_rfid_id;
-	 replace_asset(asset_);   
+	 replace_asset(asset_, pimped);   
      replace_marketing(event_,"e0");
      replace_instruction(event_,"e0");
      replace_screen(instruction[event_]["e0"][3]);
      console.log("sleeping...")
-     timeout = setTimeout(function(){install_pump_e1(event_);}, 15000);
+     timeout = setTimeout(function(){install_pump_e1(event_);}, 10000);
 
 }
 
@@ -237,16 +251,26 @@ function install_pump_e1(event_){
     replace_marketing(event_,"e1");
     replace_screen(instruction[event_]["e1"][3]);
     console.log("setting asset installed");
-    $.ajax({
-            type: 'GET',
-            url: "/asset_installed/",
-            //data: 0,
-            //async: false,
-            success: function (data) {
-              
-             }
-        });
+    
+    //one pixel image trick to create a http transaction
+    
+    //inform backend that the installation process is completed
+    //var image = new Image();
+    //image.src = "/asset_installed/";
+    update_asset_status(2);
+    //wait(5000);
+    //installed=true;
+    
+    /*
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "POST", "/asset_installed/", false ); // false for synchronous request
+    xmlHttp.send( null );
+    */
+  
    }
+
+   
+
 /*
 function install_pump_e2(event_){
    console.log("sleeping...")
@@ -269,15 +293,15 @@ function install_pump_e2(event_){
 }
 */
 
-function reset_all_texts(event_nr, asset_rfid_id){
+function reset_all_texts(event_nr, asset_rfid_id, pimped){
 //event 8 does not change any instructions/marketing or speaker
 var event_="event"+event_nr.toString();
 switch (event_nr){
 case 8:
      break;
 case 2:
-     install_pump(event_, asset_rfid_id);
-     update_asset_status(event_nr);
+     installed==false;
+     install_pump(event_, asset_rfid_id, pimped);
      break;
 case 10:
      replace_instruction(event_);
@@ -285,28 +309,32 @@ case 10:
 
 case 6:
     var asset_ = "a"+asset_rfid_id.toString();
-    $("#asset_image").one("load", function() {
+    //$("#asset_image").one("load", function() {
+        replace_asset(asset_, true);
         replace_marketing(event_);
 	    replace_instruction(event_);
 	    update_asset_status(event_nr);
-	    $( "#screenshot" ).attr('src', instruction[event_][2]);
-     }).attr("src", asset[asset_][3]);
+	    replace_screen(instruction[event_][2]);
+	    //$( "#screenshot" ).attr('src', instruction[event_][2]);
+     //}).attr("src", asset[asset_][3]);
        break;
 case 7:
  var asset_ = "a"+asset_rfid_id.toString();
- $("#asset_image").one("load", function() {
+ //$("#asset_image").one("load", function() {
     //replace_asset_boosted(asset_);
      //$("#screenshot").one("load", function() {
 	   //replace_marketing(event_);
+	   replace_asset(asset_, false);
 	   replace_instruction(event_);
 	   update_asset_status(event_nr);
 	   replace_screen(instruction[event_][2]);
-	   $( "#screenshot" ).attr('src', instruction[event_][2]);
+	   //$( "#screenshot" ).attr('src', instruction[event_][2]);
        //replace_asset(asset_);
      //}).attr("src", "static/img/"+ instruction[event_][2]);
-   }).attr("src", asset[asset_][2]);
+   //}).attr("src", asset[asset_][2]);
        break;
 case 3:
+      console.log("event 3");
       replace_marketing(event_);
 	  replace_instruction(event_);
 	  update_asset_status(event_nr);
@@ -332,6 +360,13 @@ case 0:
 	  replace_instruction(event_);
 	  replace_screen(instruction[event_][2]);
       break;
+case 11:
+case 12:
+      console.log("event 11");
+      replace_instruction(event_);
+	  //update_asset_status(event_nr);
+	  break;
+
 default:
     replace_marketing(event_);
 	replace_instruction(event_);
@@ -381,13 +416,16 @@ $( document ).ready(function() {
               messagecount += 1;
               var event = JSON.parse(evt.data);
               event_nr=event.event;
-              esset_rfid_id=event.asset_rfid_id;
+              asset_rfid_id=event.asset_rfid_id;
+              pimped=event.pimped;
+              //while (!(installed==true)){
+              //}
+               if(!(current_event==event_nr)){
+               reset_all_texts(event_nr, asset_rfid_id, pimped);
               
-              if(!(current_event==event_nr)){
-              reset_all_texts(event_nr, esset_rfid_id);
-              current_event=event_nr;
-              //jQuery("#container_speach").html(evt.data);
-              }
+               current_event=event_nr;
+               //jQuery("#container_speach").html(evt.data);
+               }
               
            }
            ws.onopen = function() {

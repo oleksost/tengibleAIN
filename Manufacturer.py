@@ -10,11 +10,12 @@ class Manufacturer(Participant):
       """
       Manufacturer is a Participant, Manufacturer has additionaly a service Bullete to update his asset on the Operator's side
       """
-      def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, bulletin_at_campus=True, bulletin=None):
-        super(Manufacturer, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure)
+      def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None, alarm_out=None, bulletin_at_campus=True, bulletin=None):
+        super(Manufacturer, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure, alarm_out)
         self.Bulletin=bulletin
+        self.blinker_Queue=None
         self.Bulletin_at_campus=bulletin_at_campus
-        #self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=10)
+        self.Next_asset_update=0
         self.Catalog={
         215:{'id':215 ,'type':'Pump','model':'1','price':1150, 'repairGPIO':37},
         138:{'id':138 ,'type':'Pump','model':'2','price':1500, 'repairGPIO':37},
@@ -34,11 +35,15 @@ class Manufacturer(Participant):
         
       def deactivate_bulletin(self):
         #self.Bulletin.Activated=False
-        Participant.stop_blink_service(self.blinker_Queue)
+        if not self.blinker_Queue == None:
+          Participant.stop_blink_service(self.blinker_Queue)
         #self.set_next_asset_update_time()
       
-      def set_next_asset_update_time(self):
+      def set_next_asset_update_time(self, seconds_=0):
+        if seconds_==0:
          self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=random.randint(10, 20))
+        else:
+         self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=seconds_)
          
       def inform_operator_about_Update(self, operator):
          #WebSocketHandler.send_updates("New data from Service Bulletin")

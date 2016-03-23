@@ -20,20 +20,24 @@ class Participant(object):
     operator_asset_repared=5
     event_pimped_asset=6
     
-    def __init__(self, gpio_out, service_bulletin_out=None, service_bullete_measure=None):
+    def __init__(self, gpio_out=None, service_bulletin_out=None, service_bullete_measure=None, alarm_out=None):
         self.GPIO_out = gpio_out
+        self.ALARM_out=alarm_out
         self.Service_Bulletin_GPIO_out = service_bulletin_out
         self.Service_Bulletin_GPIO_Measure = service_bullete_measure
-        GPIO.setup(gpio_out, GPIO.OUT)
+        if not alarm_out==None:
+                  GPIO.setup(alarm_out, GPIO.OUT)
+        if not gpio_out==None:
+                  GPIO.setup(gpio_out, GPIO.OUT)
         if not service_bulletin_out==None and not service_bullete_measure== None:
           GPIO.setup(service_bulletin_out, GPIO.OUT)
           GPIO.setup(service_bullete_measure, GPIO.IN)
     @classmethod
-    def update_event(cls, event, asset_rfid_id=0, hint_id=0):
+    def update_event(cls, event, asset_rfid_id=0, pimped=False):
        data = {}
        data['event'] = event
        data['asset_rfid_id'] = asset_rfid_id
-       data['hint'] = hint_id
+       data['pimped'] = pimped
        json_data = json.dumps(data)
        WebSocketHandler.send_updates(json_data)
     
@@ -64,10 +68,13 @@ class Participant(object):
     @staticmethod
     def asset_bough(asset):
           #greating="Great choice! You just bought the Asset "
-          Participant.update_event(2, asset.RFID_Identifier)
+          if asset.Pimped:
+           Participant.update_event(2, asset.RFID_Identifier, True)
+          else:
+           Participant.update_event(2, asset.RFID_Identifier)
           #WebSocketHandler.send_updates(greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price))
           #Participant.show_img("img/2.PNG")
-          time.sleep(1)
+          #time.sleep(1)
           #Participant.show_img("img/3.PNG")
           #time.sleep(1)
 
