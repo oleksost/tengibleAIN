@@ -94,9 +94,11 @@ div, img{
 
 
 #button_next{
+visibility:hidden;
 }
 
 #button_previous{
+visibility:hidden;
 }
 
 #button_reset{

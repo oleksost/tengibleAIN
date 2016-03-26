@@ -201,7 +201,7 @@ def main(a,queue):
          GPIO.output(Manufacturer.GPIO_out, GPIO.HIGH)   
          Manufacturer.activate_bulletin(queue)
       else:
-         Manufacturer.set_next_asset_update_time(10)
+         Manufacturer.set_next_asset_update_time(1)
          
       if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus:
          Manufacturer.activate_bulletin(queue)
@@ -219,7 +219,7 @@ def main(a,queue):
          if not Operator.Informed_about_recent_update:
              Participant.update_event(4)
              Operator.Informed_about_recent_update=True
-             GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.LOW)
+             GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
              time.sleep(2)
              GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.LOW)
          Manufacturer.inform_operator_about_Update(Operator)
@@ -230,7 +230,7 @@ def main(a,queue):
       if Operator.Asset.Next_Break==0:
        Operator.Asset.set_next_break()
       #MANUAL BREAK
-      print broken_count_securit
+      #print broken_count_securit
       if GPIO.input(BREAK_ASSET)==0:
          broken_count_securit=0
          
@@ -239,7 +239,7 @@ def main(a,queue):
          broken_count_securit=broken_count_securit+1
       if GPIO.input(BREAK_ASSET)==0:
          broken_count_securit=0
-      if broken_count_securit>10 and not Operator.Asset.Brocken and Operator.Has_asset and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus:
+      if broken_count_securit>5 and not Operator.Asset.Brocken and Operator.Has_asset and Manufacturer.Bulletin.Activated and not Manufacturer.Bulletin_at_campus:
          Operator.Asset_is_working=False
          broken_count_securit=0
        
@@ -282,13 +282,13 @@ def main(a,queue):
     
         
     ##HANDLING THE SERVICE CAR AND REPAIRING THE ASSET## 
-    if GPIO.input(Operator.Asset.GPIO_to_repair)==0 and service_car_stays_at_operators<=6:
+    if GPIO.input(Operator.Asset.GPIO_to_repair)==0 and service_car_stays_at_operators<=3:
          service_car_stays_at_operators+=1
     if GPIO.input(Operator.Asset.GPIO_to_repair)==1 and service_car_stays_at_operators>=-6:
          service_car_stays_at_operators-=1
 
     #check for the status on the repair GPIO of the asset, if a magnet is on the senscor, the GPIO_to_repair of the asset is 0
-    if Operator.Asset.Brocken and service_car_stays_at_operators>5:
+    if Operator.Asset.Brocken and service_car_stays_at_operators>2:
                #stop blinking ALL
                Service.repare_Asset(Operator,blinker_Queue_Service,blinker_Queue_Operator,blinker_Queue_Manufacturer)
                next_hint_to_remove_service_car=datetime.datetime.now()+datetime.timedelta(seconds=20)
@@ -311,7 +311,7 @@ def main(a,queue):
     ### END HANDLING THE SERVICE CAR AND REPAIRING THE ASSET##
     
              
-    if ASSET_INSTALLED and not Operator.Asset.Brocken and Operator.Has_asset and Manufacturer.Bulletin.Activated:
+    if ASSET_INSTALLED and not Operator.Asset.Brocken and Operator.Has_asset:
     ####HANDLING ASSET PIMPING#######
      if GPIO.input(Operator.Pimp_GPIO)==1 and pimping<=8:
          pimping+=1

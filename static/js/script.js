@@ -15,6 +15,7 @@ EVENTS
 
 var paused=false;
 var timeout;
+var timeout_e1=null;
 var installed=true;
 var current_asset;
 var current_event;
@@ -216,14 +217,6 @@ function replace_iframe(current_url){
 	$("#ain").attr('src', current_url); 
 }
 
-/*
-function display_hint(fint_nr){
-  var hint = "h"+fint_nr.toString();
-  $( "#hints" ).text(hints[hint][0]); 
-  //console.log(hints[hint][0]);
-}
-*/
-
 function replace_screen(src){
 if (!(last_image==src)){
     
@@ -242,6 +235,9 @@ if (!(last_image==src)){
 
 //TODO_: implement this function in a loop
 function install_pump(event_,asset_rfid_id, pimped){
+     timeout_e1=null;
+     $("#button_next").css("visibility","visible");
+     $("#button_previous").css("visibility","hidden");
      var asset_ = "a"+asset_rfid_id.toString();
      console.log("setting current_asset "+pimped);
      current_asset=asset_rfid_id;
@@ -256,16 +252,22 @@ function install_pump(event_,asset_rfid_id, pimped){
 
 
 function install_pump_e1(event_){
+    //$("#button_next").css("visibility","hidden");
+    $("#button_previous").css("visibility", "visible");
     replace_marketing(event_,"e1");
     replace_screen(instruction[event_]["e1"][3]);
     console.log("setting asset installed");
-    
+    update_asset_status(2);
     //one pixel image trick to create a http transaction
     
     //inform backend that the installation process is completed
+    timeout_e1 = setTimeout(function(){
     var image = new Image();
     image.src = "/asset_installed/";
-    update_asset_status(2);
+    }, 10000);
+    
+    
+    //update_asset_status(2);
     //wait(5000);
     //installed=true;
     
@@ -321,6 +323,7 @@ case 8:
 case 2:
      installed=false;
      install_pump(event_, asset_rfid_id, pimped);
+     
      break;
 case 10:
      replace_instruction(event_);
@@ -437,9 +440,9 @@ $( document ).ready(function() {
 	preload(["static/img/screenshot1.jpg","static/img/screenshot2.jpg","static/img/screenshot3.jpg","static/img/screenshot4.jpg"]);
 	
 	if ("WebSocket" in window){
-           var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
-           //var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
-           var messagecount = 0;
+           //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
+           var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
+           //var messagecount = 0;
            start_demo();
            ws.onmessage = function(evt) {
               messagecount += 1;
@@ -450,16 +453,13 @@ $( document ).ready(function() {
               //while (!(installed==true)){
               //}
               if(!(current_event==event_nr)){
-                //if (installed==true){
+                if (current_event==2){
+                  $("#button_previous").css("visibility", "hidden");
+                  $("#button_next").css("visibility", "hidden");
+                 }
                  reset_all_texts(event_nr, asset_rfid_id, pimped);
                  current_event=event_nr;
                  console.log(event_nr);
-               // }else{
-               // console.log("To backup");
-            //if(event_nr==9){ 
-              //  event_backup.push({number:event_nr, asset_rfid:asset_rfid_id, pimp:pimped});      
-              //          }
-               //}
              } 
            }
            ws.onopen = function() {
@@ -499,7 +499,15 @@ $("#button_next").click(function(evt) {
         //paused=true;
         clearTimeout(timeout);
         //var event_="event"+current_event.toString();
-        install_pump_e1("event2");
+        if(!(timeout_e1==null)){
+          clearTimeout(timeout_e1);
+          var image = new Image();
+          image.src = "/asset_installed/";
+          $("#button_previous").css("visibility", "hidden");
+          $("#button_next").css("visibility", "hidden");
+         }else{
+           install_pump_e1("event2");
+              }
         }
      });
 
@@ -507,10 +515,17 @@ $("#button_previous").click(function(evt) {
 
        if(current_event==2){
         console.log("clearing");
+        if(!(timeout_e1==null)){
+          clearTimeout(timeout_e1);
+          timeout_e1==null;
+         }
         //paused=true;
         //clearTimeout(timeout);
         //var event_="event"+current_event.toString();
         install_pump("event2",current_asset);
+        
+        
+        
         }
      });
 
