@@ -21,8 +21,8 @@ var current_event;
 var last_image="";
 var current_speaker;
 var last_animation_ready=true;
-var cerrent_instruction="";
-
+var cerrent_instruction="screenshot1";
+var event_backup = [];
 
 function wait(ms){
    var start = new Date().getTime();
@@ -100,7 +100,10 @@ function replace_asset(asset_, pimped){
 }
 
 function replace_asset_boosted(asset_){
+
 $( "#asset_image" ).attr('src', asset[asset_][3]);
+
+
 }
 
 //updating the asset status
@@ -174,10 +177,8 @@ function replace_minifigure(event_, speaker){
                         
 }
 
-
 // Replace the Instructions and the speaker
 function replace_instruction(event_, subevent){
-
    // fade out
   //last_animation_ready=false;
   $( "#container_speach" ).animate({
@@ -225,9 +226,16 @@ function display_hint(fint_nr){
 
 function replace_screen(src){
 if (!(last_image==src)){
-    $( "#screenshot" ).attr('src', src);
+    
+    $('#'+last_image).css('visibility','hidden');
+    $('#'+src).css('visibility','visible');
+    last_image=src;
+    
+    /*$( "#screenshot" ).attr('src', src);
     //$( "#screenshot" ).attr('src', img);
-    last_image=src; 
+    */
+    
+    
 }
 }
 
@@ -255,16 +263,27 @@ function install_pump_e1(event_){
     //one pixel image trick to create a http transaction
     
     //inform backend that the installation process is completed
-    //var image = new Image();
-    //image.src = "/asset_installed/";
+    var image = new Image();
+    image.src = "/asset_installed/";
     update_asset_status(2);
     //wait(5000);
     //installed=true;
     
     /*
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "POST", "/asset_installed/", false ); // false for synchronous request
+    xmlHttp.open( "POST", "/asset_installed/", true ); // false for synchronous request
     xmlHttp.send( null );
+    */
+  
+    /*setTimeout(function(){
+       console.log(event_backup.length);
+       for (var i = 0; i < event_backup.length; i++) {
+        console.log(event_backup[i].number);
+        reset_all_texts(event_backup[i].number,event_backup[i].asset_rfid,event_backup[i].pimp);
+       }     
+      installed=true;
+      
+    }, 10000);
     */
   
    }
@@ -300,7 +319,7 @@ switch (event_nr){
 case 8:
      break;
 case 2:
-     installed==false;
+     installed=false;
      install_pump(event_, asset_rfid_id, pimped);
      break;
 case 10:
@@ -394,11 +413,18 @@ console.log("starting...");
      $.ajax({
             type: 'GET',
             url: "/start/",
-            success: function (data) {            
+            success: function (data) {
               
             }
         });
 }
+
+function preload(arrayOfImages) {
+   for (index = 0; index < arrayOfImages.length; ++index) {
+      $('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+1)).appendTo('#container_iframe').css('visibility','hidden');
+   }
+}
+
 
 // INITIAL SETUP
 $( document ).ready(function() {
@@ -407,6 +433,9 @@ $( document ).ready(function() {
 	//test
 	//reset_all_texts(0, 0, 0);
 	screen_mode("screenshot");
+	
+	preload(["static/img/screenshot1.jpg","static/img/screenshot2.jpg","static/img/screenshot3.jpg","static/img/screenshot4.jpg"]);
+	
 	if ("WebSocket" in window){
            var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
            //var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
@@ -420,13 +449,18 @@ $( document ).ready(function() {
               pimped=event.pimped;
               //while (!(installed==true)){
               //}
-               if(!(current_event==event_nr)){
-               reset_all_texts(event_nr, asset_rfid_id, pimped);
-              
-               current_event=event_nr;
-               //jQuery("#container_speach").html(evt.data);
-               }
-              
+              if(!(current_event==event_nr)){
+                //if (installed==true){
+                 reset_all_texts(event_nr, asset_rfid_id, pimped);
+                 current_event=event_nr;
+                 console.log(event_nr);
+               // }else{
+               // console.log("To backup");
+            //if(event_nr==9){ 
+              //  event_backup.push({number:event_nr, asset_rfid:asset_rfid_id, pimp:pimped});      
+              //          }
+               //}
+             } 
            }
            ws.onopen = function() {
               messagecount = 0;

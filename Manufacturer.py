@@ -18,7 +18,7 @@ class Manufacturer(Participant):
         self.Next_asset_update=0
         self.Catalog={
         215:{'id':215 ,'type':'Pump','model':'1','price':1150, 'repairGPIO':37},
-        138:{'id':138 ,'type':'Pump','model':'2','price':1500, 'repairGPIO':37},
+        209:{'id':209 ,'type':'Pump','model':'2','price':1500, 'repairGPIO':37},
         133:{'id':133 ,'type':'Pump','model':'3','price':2000, 'repairGPIO':37}
         }
         

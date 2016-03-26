@@ -20,7 +20,7 @@ EVENTS
  asset = {};
  asset.a000 = ["...", "...", new Image().src="static/img/asset0.png",""];
  asset.a215 = ["123456-1", "Industrial Gas Turbine", new Image().src="static/img/asset1.gif", new Image().src="static/img/asset1x.png","123456-11"];	
- asset.a138 = ["123457-1", "Air Compressor", new Image().src="static/img/asset2.png",new Image().src="static/img/asset2x.png", "123457-2"];
+ asset.a209 = ["123457-1", "Air Compressor", new Image().src="static/img/asset2.png",new Image().src="static/img/asset2x.png", "123457-2"];
  asset.a133 = ["123458-1", "Seawater Pump", new Image().src="static/img/asset3.png",new Image().src="static/img/asset3x.png", "123458-2"];
 
 
@@ -51,23 +51,23 @@ speaker.service=["Service provider", new Image().src="static/img/minifigure2.png
 
 // Instruction arrays [Text] //
 instruction = {};
-instruction.event0 = ["I need a new pump for my plant. Let’s get one from the factory and install it at the functional location.",speaker.operator, new Image().src="static/img/screenshot1.jpg"];
-instruction.event1 = ["Can I offer you another asset? Please don’t forget to put the performance improving part back to the service.",speaker.manufacturer, new Image().src="static/img/screenshot1.jpg"];
+instruction.event0 = ["I need a new pump for my plant. Let’s get one from the factory and install it at the functional location.",speaker.operator, "screenshot1"];
+instruction.event1 = ["Can I offer you another asset? Please don’t forget to put the performance improving part back to the service.",speaker.manufacturer, "screenshot1"];
 
 //Installation
 instruction.event2 = {};
-instruction.event2.e0 =["Nice ", "! I will create the virtual equipment to receive all model data straight from the manufacturer.",speaker.operator, new Image().src="static/img/screenshot2.jpg"];
-instruction.event2.e1 =["Nice ", "! I’ll finish the configuration and save the complete documentation with this digital twin.",speaker.operator, new Image().src="static/img/screenshot3.jpg"];
+instruction.event2.e0 =["Nice ", "! I will create the virtual equipment to receive all model data straight from the manufacturer.",speaker.operator, "screenshot2"];
+instruction.event2.e1 =["Nice ", "! I’ll finish the configuration and save the complete documentation with this digital twin.",speaker.operator, "screenshot3"];
 //instruction.event2.e2 =["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, "screenshot3.jpg"];
 
 instruction.event3 = ["Drive my truck onto the operator’s site to fix this!",speaker.service];
-instruction.event9 = ["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, new Image().src="static/img/screenshot3.jpg"];
-instruction.event4 = ["Cool! You are a great help. Finally I do not have to search in every supplier portal for the latest information.", speaker.operator, new Image().src="static/img/screenshot4.jpg"];
+instruction.event9 = ["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, "screenshot3"];
+instruction.event4 = ["Cool! You are a great help. Finally I do not have to search in every supplier portal for the latest information.", speaker.operator, "screenshot4"];
 instruction.event5 = ["Thanks, this was a successful first visit fix. The truck may now leave my site.",speaker.operator];
-instruction.event6 = ["Thanks, the new component increased the performance by 23%!",speaker.operator,new Image().src="static/img/screenshot5.jpg"];
-instruction.event7 = ["Sorry to hear, you didn’t like it. Can do something else for you?",speaker.service,new Image().src="static/img/screenshot5.jpg"]; 
-instruction.event10 = ["For this functional location I would recommend a better motor. Install my 15 kW motor  to improve the performance.",speaker.service, new Image().src="static/img/screenshot4.jpg"];
-instruction.event11 = ["Hey, would you mind putting my truck back to the service garage?", speaker.service, new Image().src="static/img/screenshot4.jpg"];
+instruction.event6 = ["Thanks, the new component increased the performance by 23%!",speaker.operator,"screenshot5"];
+instruction.event7 = ["Sorry to hear, you didn’t like it. Can do something else for you?",speaker.service,"screenshot5"]; 
+instruction.event10 = ["For this functional location I would recommend a better motor. Install my 15 kW motor  to improve the performance.",speaker.service, "screenshot4"];
+instruction.event11 = ["Hey, would you mind putting my truck back to the service garage?", speaker.service, "screenshot4"];
 instruction.event12 = ["Thank you!", speaker.service, new Image().src="static/img/screenshot4.jpg"];
 //instruction.event13 = ["Please remove the service pack.", speaker.service, new Image().src="static/img/screenshot4.jpg"];
 

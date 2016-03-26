@@ -160,7 +160,7 @@ def main(a,queue):
    GPIO.output(Operator.ALARM_out, GPIO.HIGH)
    Operator.buy_asset(Manufacturer, queue)
    
-   ASSET_INSTALLED=True
+   #ASSET_INSTALLED=True
    #GPIO.output(self.ALARM_out, GPIO.LOW)
    
    #Variables for the service car handling
@@ -184,36 +184,37 @@ def main(a,queue):
    service_car_stays_at_operators=0
    next_hint_to_remove_service_car=0
    
+   pimping=0
    
    while queue.empty():
    
     #checking if the Asset is on the RFID reader
     Operator.check_asset()
     
-    if Operator.Has_asset and ASSET_INSTALLED:
+    if Operator.Has_asset and ASSET_INSTALLED and not Operator.Asset.Brocken and Operator.Has_asset:
     ##BULLETIN HANDLING###  
       if not Manufacturer.Next_asset_update==0:
-       if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin.Activated and not Operator.Asset.Brocken and Operator.Has_asset:
+        if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin.Activated:
          Manufacturer.Bulletin.Activated=True
          Manufacturer.Bulletin_at_campus=True
          Participant.update_event(9)
-         GPIO.output(Manufacturer.GPIO_out, GPIO.HIGH)
+         GPIO.output(Manufacturer.GPIO_out, GPIO.HIGH)   
          Manufacturer.activate_bulletin(queue)
       else:
-         Manufacturer.set_next_asset_update_time(5)
+         Manufacturer.set_next_asset_update_time(10)
          
-      if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
+      if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==0 and not Manufacturer.Bulletin_at_campus:
          Manufacturer.activate_bulletin(queue)
          Manufacturer.Bulletin_at_campus=True
 
          
-      if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken and Operator.Has_asset:
+      if Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and Manufacturer.Bulletin_at_campus:
          Manufacturer.deactivate_bulletin()
          GPIO.output(Manufacturer.GPIO_out, GPIO.LOW)
          Manufacturer.Bulletin_at_campus=False
          
       if not Manufacturer.Next_asset_update ==0:
-       if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and not Manufacturer.Bulletin_at_campus and not Operator.Asset.Brocken:
+       if datetime.datetime.now()>Manufacturer.Next_asset_update and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0 and Manufacturer.Bulletin.Activated and GPIO.input(Manufacturer.Service_Bulletin_GPIO_Measure)==1 and not Manufacturer.Bulletin_at_campus:
          print "Informing"
          if not Operator.Informed_about_recent_update:
              Participant.update_event(4)
@@ -253,8 +254,10 @@ def main(a,queue):
              if not Operator.Informed_about_recent_update:
                Manufacturer.Bulletin.Activated=False
              Manufacturer.deactivate_bulletin()
+             Manufacturer.Next_asset_update=0
              GPIO.output(Manufacturer.GPIO_out, GPIO.LOW)
-             #ASSET_INSTALLED=False
+             GPIO.output(Service.GPIO_out, GPIO.LOW)
+             ASSET_INSTALLED=False
              INFORMED_BULLETIN=False
              #Operator.Informed_about_recent_update=False
              Operator.Asset.Next_Pimp=0
@@ -275,14 +278,15 @@ def main(a,queue):
          blinker_Queue_Service=Participant.blink_service(Service.ALARM_out,0.5, queue)       
          blinker_Queue_Operator=Participant.blink_service(Operator.ALARM_out,0.5, queue)         
          blinker_Queue_Manufacturer=Participant.blink_service(Manufacturer.ALARM_out,0.5, queue)         
-        
     
+    
+        
+    ##HANDLING THE SERVICE CAR AND REPAIRING THE ASSET## 
     if GPIO.input(Operator.Asset.GPIO_to_repair)==0 and service_car_stays_at_operators<=6:
          service_car_stays_at_operators+=1
     if GPIO.input(Operator.Asset.GPIO_to_repair)==1 and service_car_stays_at_operators>=-6:
          service_car_stays_at_operators-=1
-         
-    ##HANDLING THE SERVICE CAR AND REPAIRING THE ASSET##
+
     #check for the status on the repair GPIO of the asset, if a magnet is on the senscor, the GPIO_to_repair of the asset is 0
     if Operator.Asset.Brocken and service_car_stays_at_operators>5:
                #stop blinking ALL
@@ -298,7 +302,7 @@ def main(a,queue):
                      informed_to_remove_he_service_car=False
                
     if not next_hint_to_remove_service_car==0:               
-     if not Operator.Asset.Brocken and service_car_stays_at_operators>5 and datetime.datetime.now()>next_hint_to_remove_service_car:
+      if not Operator.Asset.Brocken and service_car_stays_at_operators>5 and datetime.datetime.now()>next_hint_to_remove_service_car:
                #hint: place the service car back to the service station
                Participant.update_event(11)
                GPIO.output(Service.GPIO_out, GPIO.HIGH)
@@ -306,18 +310,22 @@ def main(a,queue):
                next_hint_to_remove_service_car=datetime.datetime.now()+datetime.timedelta(seconds=20)
     ### END HANDLING THE SERVICE CAR AND REPAIRING THE ASSET##
     
-         
-         
+             
     if ASSET_INSTALLED and not Operator.Asset.Brocken and Operator.Has_asset and Manufacturer.Bulletin.Activated:
     ####HANDLING ASSET PIMPING#######
-    #remind to pimp the asset                     
+     if GPIO.input(Operator.Pimp_GPIO)==1 and pimping<=8:
+         pimping+=1
+     
+     if GPIO.input(Operator.Pimp_GPIO)==0 and pimping>=-7:
+         pimping-=1   
+     #remind to pimp the asset                     
      if not Manufacturer.Bulletin_at_campus and GPIO.input(Operator.Service_Bulletin_GPIO_Measure)==0:
       if first_pimp and Operator.Asset.Next_Pimp==0 and not Operator.Asset.Pimped:
         #print "handle"
         #print Operator.Asset.Pimped
         Operator.Asset.set_next_pimp_reminder(seconds_=8)
         
-        if GPIO.input(Operator.Pimp_GPIO)==0:
+        if pimping<5:
                Operator.Asset.Pimped=False
                 
       if not Operator.Asset.Next_Pimp==0:      
@@ -329,7 +337,8 @@ def main(a,queue):
                 first_pimp=False
                
      ####Pimping the asset
-     if GPIO.input(Operator.Pimp_GPIO)==1 and not Operator.Asset.Pimped and not INFORMED_BULLETIN:
+              
+     if pimping>7 and not Operator.Asset.Pimped and not INFORMED_BULLETIN:
                Operator.pimp_the_pump()
                INFORMED_BULLETIN=True
                GPIO.output(Operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
@@ -341,7 +350,7 @@ def main(a,queue):
                GPIO.output(Service.GPIO_out, GPIO.LOW)
                
                
-     if GPIO.input(Operator.Pimp_GPIO)==0 and Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
+     if pimping==0 and Operator.Asset.Pimped and not Operator.Asset.Brocken and Operator.Has_asset:
                Operator.unpimp_the_pump()
                GPIO.output(Service.GPIO_out, GPIO.HIGH)
                time.sleep(2)
@@ -410,7 +419,7 @@ class StopHandler(tornado.web.RequestHandler):
               print "nothing to stop"
                
          def post(self):
-             #GPIO.cleanup()
+            #GPIO.cleanup()
             #GPIO.setmode(GPIO.BOARD)
             print "Attempting to stop"
             try:
