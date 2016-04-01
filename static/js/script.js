@@ -1,19 +1,21 @@
 /*
 EVENTS
 1 - installation of  a new aset
-2 - new asset installed, show new asset information
-  2.e0 - asset registration
-  2.e1 - asset synchronisation
-  2.e2 - asset synchronisation Manufacturer responce
-3 - Asset is brocken
+2 - new assetsinstalled, show new assetsinformation
+  2.e0 - assetsregistration
+  2.e1 - assetssynchronisation
+  2.e2 - assetssynchronisation Manufacturer responce
+3 - assetsis brocken
 4 - new update service Bulletin
-5 - Asset repaired
-6 - asset can be pimped 
-7 - Asset is pimped
+5 - assetsrepaired
+6 - assetscan be pimped 
+7 - assetsis pimped
 8 - display a new hint
 */
 
 var paused=false;
+//var installed=false;
+var next_event={};
 var timeout;
 var timeout_e1=null;
 var installed=true;
@@ -25,6 +27,7 @@ var last_animation_ready=true;
 var cerrent_instruction="screenshot1";
 var event_backup = [];
 
+/*
 function wait(ms){
    var start = new Date().getTime();
    var end = start;
@@ -32,9 +35,9 @@ function wait(ms){
      end = new Date().getTime();
   }
 }
+*/
 
-
-//var initial_asset = "a0";
+//var initial_assets= "a0";
 //var initial_marketing = "event0";
 //var initial_instruction = "event0";
 //var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
@@ -44,13 +47,13 @@ function screen_mode(mode){
   console.log("changing screenmode to "+mode);
  $("#container_iframe").empty(); // clears iframe container
  switch(mode){
-    case "screenshot":  $("#container_iframe").append("<img id='screenshot' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");
+    case "screenshot":  $("#container_iframe").append("<img id='screenshot1' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");
                         console.log("changed to screenshot");
           break;
     case "iframe": $("#container_iframe").append("<iframe id='ain' src='http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview'></iframe>");
           console.log("changed to iframe");
           break;
-    default: $("#container_iframe").append("<img id='screenshot' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");   
+    default: $("#container_iframe").append("<img id='screenshot1' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");   
             console.log("changed to default");
 
   }
@@ -88,26 +91,36 @@ function replace_marketing(event_,subevent){
 // Replace Text of Digital Twin
 function replace_asset(asset_, pimped){
     console.log(asset_);
-	$( "#twin_id" ).text(asset[asset_][0]);
-	$( "#twin_model" ).text(asset[asset_][1]);
+    console.log(pimped);
+	$( "#twin_id" ).text(assets[asset_][0]);
+	$( "#twin_model" ).text(assets[asset_][1]);
 	if (pimped==true){
-	  $( "#asset_image" ).attr('src', asset[asset_][3]);
-	  $( "#twin_id" ).text(asset[asset_][4]);
+	  var src = $('#'+asset_+'x').attr('src');
+	  $( "#asset_image" ).animate({
+      opacity: 0,
+     }, 500, function(){
+     
+	     $( "#asset_image" ).attr('src', src);
+	     // fade in
+	     $( "#asset_image" ).animate({opacity: 1,}, 500);
+	     }); 
+	  $( "#twin_id" ).text(assets[asset_][3]);
 	}else{
-	  $( "#asset_image" ).attr('src', asset[asset_][2]);
-	  $( "#twin_id" ).text(asset[asset_][0]);
+	  var src = $('#'+asset_).attr('src');
+	  $( "#asset_image" ).animate({
+      opacity: 0,
+      }, 500, function(){
+	  $( "#asset_image" ).attr('src', src);
+	  $( "#asset_image" ).animate({opacity: 1,}, 500);
+	  
+	   }); 
+	  $( "#twin_id" ).text(assets[asset_][0]);
 	  
 	}
 }
 
-function replace_asset_boosted(asset_){
 
-$( "#asset_image" ).attr('src', asset[asset_][3]);
-
-
-}
-
-//updating the asset status
+//updating the assetsstatus
 function update_asset_status(event){
 switch (event){
        case 3:  
@@ -188,7 +201,7 @@ function replace_instruction(event_, subevent){
   // Animation complete
   	if (event_=="event2"){
                  var minifigure=instruction[event_][subevent][2][1];
-                   	 $( "#container_speach").text(instruction[event_][subevent][0]+ asset["a"+current_asset.toString()][1] +instruction[event_][subevent][1]);
+                   	 $( "#container_speach").text(instruction[event_][subevent][0]+ assets["a"+current_asset.toString()][1] +instruction[event_][subevent][1]);
   	                 $( "#speaker" ).text(instruction[event_][subevent][2][0]);
                      //cerrent_instruction=instruction[event_][subevent][0];
            }else{
@@ -220,8 +233,9 @@ function replace_iframe(current_url){
 function replace_screen(src){
 if (!(last_image==src)){
     
-    $('#'+last_image).css('visibility','hidden');
-    $('#'+src).css('visibility','visible');
+    $('#'+last_image+"a"+current_asset).css('visibility','hidden');
+    //$('#'+src).css('visibility','visible');
+    $('#'+src+"a"+current_asset).css('visibility','visible');
     last_image=src;
     
     /*$( "#screenshot" ).attr('src', src);
@@ -239,8 +253,8 @@ function install_pump(event_,asset_rfid_id, pimped){
      $("#button_next").css("visibility","visible");
      $("#button_previous").css("visibility","hidden");
      var asset_ = "a"+asset_rfid_id.toString();
-     console.log("setting current_asset "+pimped);
-     current_asset=asset_rfid_id;
+     console.log("setting current_assets"+pimped);
+     //current_asset=asset_rfid_id;
 	 replace_asset(asset_, pimped);   
      replace_marketing(event_,"e0");
      replace_instruction(event_,"e0");
@@ -252,18 +266,22 @@ function install_pump(event_,asset_rfid_id, pimped){
 
 
 function install_pump_e1(event_){
-    //$("#button_next").css("visibility","hidden");
-    $("#button_previous").css("visibility", "visible");
+   
     replace_marketing(event_,"e1");
     replace_screen(instruction[event_]["e1"][3]);
-    console.log("setting asset installed");
+    //console.log("setting assetsinstalled");
     update_asset_status(2);
     //one pixel image trick to create a http transaction
     
     //inform backend that the installation process is completed
     timeout_e1 = setTimeout(function(){
-    var image = new Image();
-    image.src = "/asset_installed/";
+    //var image = new Image();
+    //image.src = "/asset_installed/";
+    installed=true;
+    $("#button_previous").css("visibility", "hidden");
+    $("#button_next").css("visibility", "hidden");
+    reset_all_texts(next_event.nr, next_event.asset, next_event.pimp);
+    current_event=nextinstalled=true;
     }, 10000);
     
     
@@ -301,7 +319,7 @@ function install_pump_e2(event_){
    $( "#marketing_text" ).text(marketing[event_]["e2"][1]);
    $( "#speaker" ).text(instruction[event_]["e2"][1][0]);
    $( "#container_speach").text(instruction[event_]["e2"][0]);
-   //update the rasp, asset installed
+   //update the rasp, assetsinstalled
    $.ajax({
             type: 'GET',
             url: "/asset_installed/",
@@ -322,6 +340,7 @@ case 8:
      break;
 case 2:
      installed=false;
+     current_asset=asset_rfid_id;
      install_pump(event_, asset_rfid_id, pimped);
      
      break;
@@ -338,35 +357,29 @@ case 6:
 	    update_asset_status(event_nr);
 	    replace_screen(instruction[event_][2]);
 	    //$( "#screenshot" ).attr('src', instruction[event_][2]);
-     //}).attr("src", asset[asset_][3]);
+     //}).attr("src", assets[asset_][3]);
        break;
 case 7:
  var asset_ = "a"+asset_rfid_id.toString();
- //$("#asset_image").one("load", function() {
-    //replace_asset_boosted(asset_);
-     //$("#screenshot").one("load", function() {
-	   //replace_marketing(event_);
 	   replace_asset(asset_, false);
 	   replace_instruction(event_);
 	   update_asset_status(event_nr);
 	   replace_screen(instruction[event_][2]);
-	   //$( "#screenshot" ).attr('src', instruction[event_][2]);
-       //replace_asset(asset_);
-     //}).attr("src", "static/img/"+ instruction[event_][2]);
-   //}).attr("src", asset[asset_][2]);
        break;
 case 3:
       console.log("event 3");
       replace_marketing(event_);
 	  replace_instruction(event_);
 	  update_asset_status(event_nr);
+	  replace_screen(instruction[event_][2]);
 	  break;
 case 5:
       replace_instruction(event_);
       update_asset_status(event_nr);
       break;
 case 1:
-      //no asset on the rfid 
+      //no assetson the rfid 
+     
 	  var asset_ = "a"+"000";
 	  update_asset_status(event_nr);
 	  replace_asset(asset_);
@@ -377,9 +390,11 @@ case 1:
       break;
 case 0:
       //INNITIAL SETUP
+      
 	  var asset_ = "a"+"000";
 	  update_asset_status(event_nr);
 	  replace_instruction(event_);
+	  replace_asset(asset_);
 	  replace_screen(instruction[event_][2]);
       break;
 case 11:
@@ -422,10 +437,16 @@ console.log("starting...");
         });
 }
 
-function preload(arrayOfImages) {
+function preload(arrayOfImages, asset) {
    for (index = 0; index < arrayOfImages.length; ++index) {
-      $('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+1)).appendTo('#container_iframe').css('visibility','hidden');
+      //$('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+1)).appendTo('#container_iframe').css('visibility','hidden');
+      $('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+2)+asset).appendTo('#container_iframe').css('visibility','hidden');
    }
+}
+function preload_pumps(arrayOfImages, asset) {
+      //$('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+1)).appendTo('#container_iframe').css('visibility','hidden');
+      $('<img />').attr('src',arrayOfImages[0]).attr('id',asset).appendTo('#container_preload');
+      $('<img />').attr('src',arrayOfImages[1]).attr('id',asset+"x").appendTo('#container_preload'); 
 }
 
 
@@ -436,8 +457,13 @@ $( document ).ready(function() {
 	//test
 	//reset_all_texts(0, 0, 0);
 	screen_mode("screenshot");
-	
-	preload(["static/img/screenshot1.jpg","static/img/screenshot2.jpg","static/img/screenshot3.jpg","static/img/screenshot4.jpg"]);
+	for(var asset in assets) 
+	   {
+          preload(assets[asset][assets[asset].length-1],asset);
+          preload_pumps(assets[asset][2],asset);
+       }
+    
+	//preload(["static/img/screenshot1.jpg","static/img/screenshot2.jpg","static/img/screenshot3.jpg","static/img/screenshot4.jpg"]);
 	
 	if ("WebSocket" in window){
            //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
@@ -453,13 +479,28 @@ $( document ).ready(function() {
               //while (!(installed==true)){
               //}
               if(!(current_event==event_nr)){
-                if (current_event==2){
+                 /*if (current_event==2){
                   $("#button_previous").css("visibility", "hidden");
                   $("#button_next").css("visibility", "hidden");
+                 }*/
+                 if (installed==false){
+                 if (!(event_nr==next_event.nr)){
+                   if(event_nr==9){
+                 console.log("saving");
+                 console.log(event_nr);
+                 //next_event={};
+                 next_event.nr=event_nr;
+                 next_event.asset=asset_rfid_id;
+                 next_event.pimp=pimped;
                  }
+                 }
+                 } else{
+                 console.log("not saving");
                  reset_all_texts(event_nr, asset_rfid_id, pimped);
                  current_event=event_nr;
                  console.log(event_nr);
+                 }
+                 
              } 
            }
            ws.onopen = function() {
@@ -501,10 +542,14 @@ $("#button_next").click(function(evt) {
         //var event_="event"+current_event.toString();
         if(!(timeout_e1==null)){
           clearTimeout(timeout_e1);
-          var image = new Image();
-          image.src = "/asset_installed/";
+          //var image = new Image();
+          //image.src = "/asset_installed/";
+           installed=true;
+    
           $("#button_previous").css("visibility", "hidden");
           $("#button_next").css("visibility", "hidden");
+          reset_all_texts(next_event.nr, next_event.asset, next_event.pimp);
+          current_event=next_event.nr;
          }else{
            install_pump_e1("event2");
               }

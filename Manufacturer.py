@@ -17,9 +17,9 @@ class Manufacturer(Participant):
         self.Bulletin_at_campus=bulletin_at_campus
         self.Next_asset_update=0
         self.Catalog={
-        215:{'id':215 ,'type':'Pump','model':'1','price':1150, 'repairGPIO':37},
-        209:{'id':209 ,'type':'Pump','model':'2','price':1500, 'repairGPIO':37},
-        133:{'id':133 ,'type':'Pump','model':'3','price':2000, 'repairGPIO':37}
+        215:{'id':215 ,'type':'Pump','model':'1','price':1150, 'repairGPIO':13},
+        209:{'id':209 ,'type':'Pump','model':'2','price':1500, 'repairGPIO':13},
+        133:{'id':133 ,'type':'Pump','model':'3','price':2000, 'repairGPIO':13}
         }
         
         
@@ -41,7 +41,7 @@ class Manufacturer(Participant):
       
       def set_next_asset_update_time(self, seconds_=0):
         if seconds_==0:
-         self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=random.randint(10, 20))
+         self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=random.randint(30, 30))
         else:
          self.Next_asset_update=datetime.datetime.now()+datetime.timedelta(seconds=seconds_)
          

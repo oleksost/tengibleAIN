@@ -36,6 +36,19 @@ body{
 div{
 	display: inline-block;
 	}
+	
+#container_preload{
+position: absolute;
+top: 0px;
+left: 0px;
+height: 0px;
+width: 0px;
+max-height: 0px;
+max-width: 0px;
+z-index: -900;
+overflow: hidden;
+visibility: hidden;
+}
 
 /*
 
@@ -116,9 +129,6 @@ visibility:hidden;
 	text-align: center;
 	float: left;
 	position:relative;
-
-
-
 }
 
 /* If an iframe is used to display the real solution */
@@ -146,6 +156,7 @@ visibility:hidden;
 
 
 
+/* ------ SIDEPANEL -------- */
 /* ------ SIDEPANEL -------- */
 
 #container_main{
@@ -219,47 +230,97 @@ visibility:hidden;
 
 
 
+
 /* ------ INSTRUCTIONS -------- */
 
 #container_instructions{
-	min-height: 15rem;
-	width: 100%;
-	background-image: url("../img/connector_bottom.png");
-	background-repeat: no-repeat;
-	background-position: top left;
-	padding-left: 4rem;
+min-height: 15rem;
+width: 100%;
+background-image: url("../img/connector_bottom.png");
+background-repeat: no-repeat;
+background-position: top left;
+padding-left: 4rem;
 
 }
 
 #container_minifigure{
-	width: 40%;
-	min-width: 5rem;
-	min-height: 5rem;
-	max-height: 10rem;
-	float: left;
-	text-align: center;
+width: 40%;
+min-width: 5rem;
+min-height: 5rem;
+max-height: 10rem;
+float: left;
+text-align: center;
 }
 
 #minifigure_image{
-	max-width: 70%;
-	max-height: 100%;
+max-width: 70%;
+max-height: 100%;
 
 }
 
+/* ------ Speachbubble -------- */
+
+
 #container_speach{
-	width: 60%;
-	height: 10rem;
-	padding: 1rem;
-	padding-left: 2.5rem;
-	line-height: 1.2rem;
-	background-image: url('../img/speachbubble.png');
-	background-repeat: no-repeat;
-	background-size: contain;
-	color: #365876;
-	overflow: hidden;
+width: 49%;
+max-width: 49%;
+min-height: 66px;
+    line-height: 1.2rem;
 
-	
 
+
+}
+
+
+
+/* THE SPEECH BUBBLE
+------------------------------------------------------------------------------------------------------------------------------- */
+
+.triangle-border {
+  position:relative;
+  padding:15px;
+  margin-left: 30px;
+  border:3px solid #FFF;
+  color: #365876;
+  background:#b1bfc7;
+  /* css3 */
+  -webkit-border-radius:3px;
+  -moz-border-radius:3px;
+  border-radius:3px;
+
+}
+
+
+/* THE TRIANGLE
+------------------------------------------------------------------------------------------------------------------------------- */
+
+.triangle-border:before {
+  content:"";
+  position:absolute;
+  top:16px; /* controls vertical position */
+  bottom:auto;
+  left:-30px; /* value = - border-left-width - border-right-width */
+  border-width:0px 30px 30px 0px;
+  border-style:solid;
+  border-color:transparent #FFF;
+  /* reduce the damage in FF3.0 */
+  display:block;
+  width:0;
+}
+
+/* creates the smaller  triangle */
+.triangle-border:after {
+  content:"";
+  position:absolute;
+  top:19px; /* value = (:before top) + (:before border-top) - (:after border-top) */
+  bottom:auto;
+  left:-23px; /* value = - border-left-width - border-right-width */
+  border-width:0px 26px 26px 0px;
+  border-style:solid;
+  border-color:transparent #b1bfc7;
+  /* reduce the damage in FF3.0 */
+  display:block;
+  width:0;
 }
 
 

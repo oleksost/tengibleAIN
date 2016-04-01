@@ -17,11 +17,11 @@ EVENTS
  
 
 // Asset Arrays [ID, MODEL, IMAGEFILE, IMAGEFILE-pimped, MODEL-pimped], RFID as identifier: e.g. a215 has RFID id 215//
- asset = {};
- asset.a000 = ["...", "...", new Image().src="static/img/asset0.png",""];
- asset.a215 = ["123456-1", "Industrial Gas Turbine", new Image().src="static/img/asset1.gif", new Image().src="static/img/asset1x.png","123456-11"];	
- asset.a209 = ["123457-1", "Air Compressor", new Image().src="static/img/asset2.png",new Image().src="static/img/asset2x.png", "123457-2"];
- asset.a133 = ["123458-1", "Seawater Pump", new Image().src="static/img/asset3.png",new Image().src="static/img/asset3x.png", "123458-2"];
+ assets = {};
+ assets.a000 = ["...", "...", ["static/img/asset0.gif",""],[]];
+ assets.a215 = ["123456-1", "Gas Turbine", ["static/img/asset1.gif", "static/img/asset1x.gif"],"123456-11",["static/img/screenshot2-1.jpg","static/img/screenshot3-1.jpg","static/img/screenshot4.jpg","static/img/screenshot5-1.jpg", "static/img/screenshot6.jpg"]];	
+ assets.a133 = ["123457-1", "Air Compressor", ["static/img/asset2.gif","static/img/asset2x.gif"], "123457-2",["static/img/screenshot2-2.jpg","static/img/screenshot3-3.jpg","static/img/screenshot4.jpg","static/img/screenshot5-2.jpg","static/img/screenshot6.jpg"]];
+ assets.a209 = ["123458-1", "Seawater Pump", ["static/img/asset3.gif","static/img/asset3x.gif"], "123458-2",["static/img/screenshot2-3.jpg","static/img/screenshot3-2.jpg","static/img/screenshot4.jpg","static/img/screenshot5-3.jpg","static/img/screenshot6.jpg"]];
 
 
 // Marketing Arrays [HEADLINE, TEXT] //
@@ -60,7 +60,7 @@ instruction.event2.e0 =["Nice ", "! I will create the virtual equipment to recei
 instruction.event2.e1 =["Nice ", "! I’ll finish the configuration and save the complete documentation with this digital twin.",speaker.operator, "screenshot3"];
 //instruction.event2.e2 =["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, "screenshot3.jpg"];
 
-instruction.event3 = ["Drive my truck onto the operator’s site to fix this!",speaker.service];
+instruction.event3 = ["Drive my truck onto the operator’s site to fix this!",speaker.service, "screenshot6"];
 instruction.event9 = ["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, "screenshot3"];
 instruction.event4 = ["Cool! You are a great help. Finally I do not have to search in every supplier portal for the latest information.", speaker.operator, "screenshot4"];
 instruction.event5 = ["Thanks, this was a successful first visit fix. The truck may now leave my site.",speaker.operator];

@@ -28,7 +28,7 @@ class Operator(Participant):
         self.Asset_is_working=True 
         self.Asset_not_on_RFID=0
         #check if the asset is already boosted
-        if GPIO.input(self.Pimp_GPIO)==1:
+        if GPIO.input(self.Pimp_GPIO)==0:
            self.Asset.Pimped=True
            
         Participant.asset_bough(self.Asset)
