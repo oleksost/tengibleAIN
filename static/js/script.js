@@ -1,25 +1,29 @@
 /*
 EVENTS
-1 - installation of  a new aset
-2 - new assetsinstalled, show new assetsinformation
-  2.e0 - assetsregistration
-  2.e1 - assetssynchronisation
-  2.e2 - assetssynchronisation Manufacturer responce
-3 - assetsis brocken
-4 - new update service Bulletin
-5 - assetsrepaired
-6 - assetscan be pimped 
-7 - assetsis pimped
-8 - display a new hint
+ #0 - initial setup
+ #1 - no asset on rfid
+ #2 - assert bought
+    2.e0 - asset registration
+    2.e1 - asset synchronisation
+ #3 - asset breaks
+ #4 - inform user about the service bulletin functionality
+ #5 - asset is repaired by the service car
+ #6 - boost the asset
+ #7 - unboost the asset
+ #8 - 
+ #9 - manufacturer wants to activat the bulletin
+ #10 - remind to boost the asset
+ #11 - remind to remove the service car form the manufacturer's facilities
+ #12 - thanks for removing the car
 */
 
 var paused=false;
-//var installed=false;
 var next_event={};
 var timeout;
 var timeout_e1=null;
 var installed=true;
-var current_asset;
+var innitial_asset="a000";
+var current_asset=innitial_asset;
 var current_event;
 var last_image="";
 var current_speaker;
@@ -36,11 +40,6 @@ function wait(ms){
   }
 }
 */
-
-//var initial_assets= "a0";
-//var initial_marketing = "event0";
-//var initial_instruction = "event0";
-//var initial_url = "http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview";
 
 // Switch between iFrame and screenshots
 function screen_mode(mode){
@@ -260,19 +259,20 @@ function install_pump(event_,asset_rfid_id, pimped){
      replace_instruction(event_,"e0");
      replace_screen(instruction[event_]["e0"][3]);
      console.log("sleeping...")
-     timeout = setTimeout(function(){install_pump_e1(event_);}, 10000);
+     timeout = setTimeout(function(){
+     install_pump_e1(event_);
+     }, 10000);
 
 }
 
 
 function install_pump_e1(event_){
-   
+    $("#button_previous").css("visibility","visible");
     replace_marketing(event_,"e1");
     replace_screen(instruction[event_]["e1"][3]);
     //console.log("setting assetsinstalled");
     update_asset_status(2);
     //one pixel image trick to create a http transaction
-    
     //inform backend that the installation process is completed
     timeout_e1 = setTimeout(function(){
     //var image = new Image();
@@ -280,8 +280,14 @@ function install_pump_e1(event_){
     installed=true;
     $("#button_previous").css("visibility", "hidden");
     $("#button_next").css("visibility", "hidden");
+    try{
+    //might throw a TypeError if esset is removed and put back on the RFID Reader  during the installation process 
     reset_all_texts(next_event.nr, next_event.asset, next_event.pimp);
-    current_event=nextinstalled=true;
+    }
+    catch (e) {}
+    finally{
+     current_event=nextinstalled=true;
+           }
     }, 10000);
     
     
@@ -379,10 +385,9 @@ case 5:
       break;
 case 1:
       //no assetson the rfid 
-     
-	  var asset_ = "a"+"000";
+
 	  update_asset_status(event_nr);
-	  replace_asset(asset_);
+	  replace_asset(innitial_asset);
 	  replace_marketing(event_);
 	  replace_instruction(event_);
 	  console.log(instruction[event_][2]); 
@@ -390,11 +395,11 @@ case 1:
       break;
 case 0:
       //INNITIAL SETUP
-      
-	  var asset_ = "a"+"000";
 	  update_asset_status(event_nr);
 	  replace_instruction(event_);
-	  replace_asset(asset_);
+	  if (!(current_asset==innitial_asset)){
+	    replace_asset(innitial_asset);
+	  }
 	  replace_screen(instruction[event_][2]);
       break;
 case 11:
@@ -453,22 +458,17 @@ function preload_pumps(arrayOfImages, asset) {
 // INITIAL SETUP
 $( document ).ready(function() {
 	console.log("document loaded");
-	//start_demo();
-	//test
-	//reset_all_texts(0, 0, 0);
 	screen_mode("screenshot");
 	for(var asset in assets) 
 	   {
           preload(assets[asset][assets[asset].length-1],asset);
           preload_pumps(assets[asset][2],asset);
        }
-    
-	//preload(["static/img/screenshot1.jpg","static/img/screenshot2.jpg","static/img/screenshot3.jpg","static/img/screenshot4.jpg"]);
 	
 	if ("WebSocket" in window){
-           //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
-           var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
-           //var messagecount = 0;
+           var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
+           //var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
+           var messagecount = 0;
            start_demo();
            ws.onmessage = function(evt) {
               messagecount += 1;
@@ -476,29 +476,27 @@ $( document ).ready(function() {
               event_nr=event.event;
               asset_rfid_id=event.asset_rfid_id;
               pimped=event.pimped;
-              //while (!(installed==true)){
-              //}
               if(!(current_event==event_nr)){
-                 /*if (current_event==2){
-                  $("#button_previous").css("visibility", "hidden");
-                  $("#button_next").css("visibility", "hidden");
-                 }*/
                  if (installed==false){
                  if (!(event_nr==next_event.nr)){
-                   if(event_nr==9){
+                   if(event_nr==9 || event_nr==1 || event_nr==0){
                  console.log("saving");
                  console.log(event_nr);
+                 current_event=event_nr;
                  //next_event={};
                  next_event.nr=event_nr;
                  next_event.asset=asset_rfid_id;
                  next_event.pimp=pimped;
+                 }else if (event_nr==2){
+                 next_event=null;
                  }
+                 
                  }
                  } else{
                  console.log("not saving");
                  reset_all_texts(event_nr, asset_rfid_id, pimped);
-                 current_event=event_nr;
                  console.log(event_nr);
+                 current_event=event_nr;
                  }
                  
              } 
@@ -564,13 +562,7 @@ $("#button_previous").click(function(evt) {
           clearTimeout(timeout_e1);
           timeout_e1==null;
          }
-        //paused=true;
-        //clearTimeout(timeout);
-        //var event_="event"+current_event.toString();
         install_pump("event2",current_asset);
-        
-        
-        
         }
      });
 

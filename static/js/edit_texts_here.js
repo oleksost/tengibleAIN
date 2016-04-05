@@ -1,17 +1,21 @@
 // Use the fields in the following arrays to edit the information that can be displayed on screen//
 /*
 EVENTS
-1 - installation of  a new aset
-2 - new asset installed, show new asset information
-  2.e0 - asset registration
-  2.e1 - asset synchronisation
-  2.e2 - asset synchronisation Manufacturer responce
-3 - Asset is brocken
-4 - new update service Bulletin
-5 - Asset repaired
-6 - asset is pimped 
-7 - sset is unpimped
-8 - display a new hint
+ #0 - initial setup
+ #1 - no asset on rfid
+ #2 - assert bought
+    2.e0 - asset registration
+    2.e1 - asset synchronisation
+ #3 - asset breaks
+ #4 - inform user about the service bulletin functionality
+ #5 - asset is repaired by the service car
+ #6 - boost the asset
+ #7 - unboost the asset
+ #8 - 
+ #9 - manufacturer wants to activat the bulletin
+ #10 - remind to boost the asset
+ #11 - remind to remove the service car form the manufacturer's facilities
+ #12 - thanks for removing the car
 */
 
  

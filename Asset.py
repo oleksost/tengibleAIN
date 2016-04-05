@@ -21,7 +21,6 @@ class Asset(object):
         
       def set_next_pimp_reminder(self, seconds_=0):
        if seconds_==0:
-        #self.Next_Pimp=datetime.datetime.now() + datetime.timedelta(seconds=random.randint(60, 70))
-        self.Next_Pimp=datetime.datetime.now() + datetime.timedelta(seconds=60)	
+        self.Next_Pimp=datetime.datetime.now() + datetime.timedelta(seconds=random.randint(60, 60))
        else:
         self.Next_Pimp=datetime.datetime.now() + datetime.timedelta(seconds=seconds_)

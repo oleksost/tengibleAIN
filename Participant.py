@@ -72,11 +72,6 @@ class Participant(object):
            Participant.update_event(2, asset.RFID_Identifier, True)
           else:
            Participant.update_event(2, asset.RFID_Identifier)
-          #WebSocketHandler.send_updates(greating + "of Type: " + str(asset.Type)+", Model: "+str(asset.Model)+" Price: "+str(asset.Price))
-          #Participant.show_img("img/2.PNG")
-          #time.sleep(1)
-          #Participant.show_img("img/3.PNG")
-          #time.sleep(1)
 
        
     @staticmethod

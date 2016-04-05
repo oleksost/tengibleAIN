@@ -1,5 +1,6 @@
 from Participant import Participant
 from Manufacturer import Manufacturer
+import time
 import Pump
 import RFID 
 import RPi.GPIO as GPIO
@@ -10,7 +11,7 @@ class Operator(Participant):
       
      def __init__(self, gpio_out=None, service_bulletin_out=None, service_bullete_measure=None, alarm_out=None, has_asset=False, asset=None, asset_works=False, on_RFID=0, informed_about_recent_update=False, pimp_gpio=None):
         super(Operator, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure, alarm_out)
-        self.Informed_about_recent_update=informed_about_recent_update
+        self.User_informed_about_recent_update=informed_about_recent_update
         self.Asset_not_on_RFID=on_RFID
         self.Has_asset=has_asset
         self.Asset=asset
@@ -20,10 +21,7 @@ class Operator(Participant):
           GPIO.setup(pimp_gpio, GPIO.IN)
           
      def buy_asset(self, manufacturer, main_queue):
-        #blinker_Queue=Participant.blink_service(self.GPIO_out,0.5, main_queue)
-        #GPIO.output(self.ALARM_out, GPIO.HIGH)
         self.Asset=Operator.readRFID(self,manufacturer.Catalog, main_queue, manufacturer)
-        #manufacturer.set_next_asset_update_time()
         print str(manufacturer.Bulletin_at_campus)
         self.Asset_is_working=True 
         self.Asset_not_on_RFID=0
@@ -50,12 +48,15 @@ class Operator(Participant):
         self.Asset.Pimped=True
         Participant.update_event(6, self.Asset.RFID_Identifier)
         #Participant.speak("Operator", "Successfully pimped the asset")
-      
-     def unpimp_the_pump(self):
+        
+     def unpimp_the_pump(self, service):
         self.Asset.Pimped=False
         Participant.update_event(7, self.Asset.RFID_Identifier)
+        GPIO.output(service.GPIO_out, GPIO.HIGH)
+        time.sleep(5)
+        GPIO.output(service.GPIO_out, GPIO.LOW)
         #Participant.speak("Operator", "Unpimped the asset")    
-           
+     
      @staticmethod
      def readRFID(operator, catalog, main_queue, manufacturer):
        bought=False
@@ -76,7 +77,7 @@ class Operator(Participant):
            GPIO.output(operator.ALARM_out, GPIO.HIGH)
            Participant.update_event(0)
            manufacturer.Bulletin.Activated=False
-           operator.Informed_about_recent_update=False
+           operator.User_informed_about_recent_update=False
            switch_to_event_0=0
          (error, tag_type) = rdr.request()    
          if not error:
@@ -86,7 +87,7 @@ class Operator(Participant):
              #print "UID: " + str(uid[1])
              try:
                 asset=catalog[uid[1]]
-                Asset=Pump.Pump(rfid_identifier=asset['id'], gpio_in_to_repair=asset['repairGPIO'], price=asset['price'], type=asset['type'], model=asset['model'])
+                Asset=Pump.Pump(rfid_identifier=asset['id'], gpio_in_to_repair=asset['repairGPIO'])
                 GPIO.output(manufacturer.GPIO_out, GPIO.LOW)
                 operator.Has_asset=True      
              except KeyError, e:
