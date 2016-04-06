@@ -15,7 +15,7 @@ import RPi.GPIO as GPIO
 from multiprocessing import Process, Queue
 import signal
 """
- EVENTS:
+ EVENTS: test
  #0 - initial setup
  #1 - no asset on rfid
  #2 - assert bought, asset information if sent to the frontend
