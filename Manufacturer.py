@@ -14,11 +14,12 @@ class Manufacturer(Participant):
         super(Manufacturer, self).__init__(gpio_out, service_bulletin_out, service_bullete_measure, alarm_out)
         self.Bulletin=bulletin
         self.blinker_Queue=None
-        self.Bulletin_at_campus=bulletin_at_campus
+        #variable signaling that the bulletin is at the manufacturer's site
+        self.Bulletin_at_manufacturers_campus=bulletin_at_campus
         self.Next_asset_update=0
         self.Catalog=catalog
         
-      def activate_bulletin(self, main_gueue):
+      def bulletin_start_blinking(self, main_gueue):
         self.blinker_Queue=Participant.blink_service(self.Service_Bulletin_GPIO_out, 0.3, main_gueue)
         
       def check_bulletin(self):
@@ -27,7 +28,7 @@ class Manufacturer(Participant):
         else:
           self.Bulletin_at_campus=True
         
-      def deactivate_bulletin(self):
+      def bulletin_stop_blinking(self):
         if not self.blinker_Queue == None:
           Participant.stop_blink_service(self.blinker_Queue)
 

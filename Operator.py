@@ -17,12 +17,21 @@ class Operator(Participant):
         self.Asset=asset
         self.Asset_is_working=asset_works
         self.Pimp_GPIO=pimp_gpio
+        ##sircuit security for service car handling
+        self.service_car_at_operators=0
         if not pimp_gpio==None:
           GPIO.setup(pimp_gpio, GPIO.IN)
+
+     def inform_about_bulletin_functionality(self):
+         Participant.update_event(4)
+         self.User_informed_about_recent_update = True
+         GPIO.output(self.Service_Bulletin_GPIO_out, GPIO.HIGH)
+         time.sleep(2)
+         GPIO.output(self.Service_Bulletin_GPIO_out, GPIO.LOW)
           
      def buy_asset(self, manufacturer, main_queue):
         self.Asset=Operator.readRFID(self,manufacturer.Catalog, main_queue, manufacturer)
-        print str(manufacturer.Bulletin_at_campus)
+        print str(manufacturer.Bulletin_at_manufacturers_campus)
         self.Asset_is_working=True 
         self.Asset_not_on_RFID=0
         #check if the asset is already boosted
@@ -35,7 +44,7 @@ class Operator(Participant):
        
      def check_asset(self):
        (error, tag_type) = rdr.request()
-       if error and not self.Asset.Brocken:
+       if error and not self.Asset.Broken:
            self.Asset_not_on_RFID += 1
        else:
            self.Asset_not_on_RFID=0
@@ -76,7 +85,7 @@ class Operator(Participant):
            GPIO.output(manufacturer.GPIO_out, GPIO.LOW)
            GPIO.output(operator.ALARM_out, GPIO.HIGH)
            Participant.update_event(0)
-           manufacturer.Bulletin.Activated=False
+           manufacturer.Bulletin.Activated_for_communication=False
            operator.User_informed_about_recent_update=False
            switch_to_event_0=0
          (error, tag_type) = rdr.request()    
@@ -95,6 +104,4 @@ class Operator(Participant):
                   print "The asset is not in the manufacturer's catalog, please try another asset"
                   last_uid=uid[1]
              break
-           
-          
        return Asset
