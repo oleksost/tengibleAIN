@@ -18,18 +18,16 @@ EVENTS
 */
 
 var paused=false;
-var next_event={};
+var backup_event={};
 var timeout;
 var timeout_e1=null;
 var installed=true;
-var innitial_asset="a000";
+var innitial_asset="000";
 var current_asset=innitial_asset;
 var current_event;
-var last_image="";
+var last_image="screenshot1";
 var current_speaker;
 var last_animation_ready=true;
-var cerrent_instruction="screenshot1";
-var event_backup = [];
 
 /*
 function wait(ms){
@@ -46,7 +44,7 @@ function screen_mode(mode){
   console.log("changing screenmode to "+mode);
  $("#container_iframe").empty(); // clears iframe container
  switch(mode){
-    case "screenshot":  $("#container_iframe").append("<img id='screenshot1' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");
+    case "screenshot":  $("#container_iframe").append("<img id='screenshot1a000' src='static/img/screenshot1.jpg' alt='Screenshot missing'>");
                         console.log("changed to screenshot");
           break;
     case "iframe": $("#container_iframe").append("<iframe id='ain' src='http://veui5infra.dhcp.wdf.sap.corp:8080/sapui5-sdk-dist/explored.html#/sample/sap.uxap.sample.AlternativeProfileObjectPageHeader/preview'></iframe>");
@@ -89,6 +87,7 @@ function replace_marketing(event_,subevent){
 
 // Replace Text of Digital Twin
 function replace_asset(asset_, pimped){
+    //current_asset=asset_;
     console.log(asset_);
     console.log(pimped);
 	$( "#twin_id" ).text(assets[asset_][0]);
@@ -231,7 +230,7 @@ function replace_iframe(current_url){
 
 function replace_screen(src){
 if (!(last_image==src)){
-    
+    console.log(src+"a"+current_asset);
     $('#'+last_image+"a"+current_asset).css('visibility','hidden');
     //$('#'+src).css('visibility','visible');
     $('#'+src+"a"+current_asset).css('visibility','visible');
@@ -278,11 +277,12 @@ function install_pump_e1(event_){
     //var image = new Image();
     //image.src = "/asset_installed/";
     installed=true;
-    $("#button_previous").css("visibility", "hidden");
-    $("#button_next").css("visibility", "hidden");
+        $("#button_previous").css("visibility", "hidden");
+        $("#button_next").css("visibility", "hidden");
+        $("#emergency").css("visibility", "hidden");
     try{
     //might throw a TypeError if esset is removed and put back on the RFID Reader  during the installation process 
-    reset_all_texts(next_event.nr, next_event.asset, next_event.pimp);
+    reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
     }
     catch (e) {}
     finally{
@@ -382,25 +382,33 @@ case 3:
 case 5:
       replace_instruction(event_);
       update_asset_status(event_nr);
+      //replace screen only
+      if (!(current_asset==innitial_asset)){
+          replace_screen(instruction[event_][2]);
+      }else{
+          replace_screen("screenshot1");
+      }
       break;
 case 1:
-      //no assetson the rfid 
-
+      //no assetson the rfid
 	  update_asset_status(event_nr);
-	  replace_asset(innitial_asset);
+      replace_screen(instruction[event_][2]);
+	  replace_asset("a"+innitial_asset);
+      current_asset=innitial_asset;
 	  replace_marketing(event_);
 	  replace_instruction(event_);
-	  console.log(instruction[event_][2]); 
-	  replace_screen(instruction[event_][2]);
+	  console.log(instruction[event_][2]);
       break;
 case 0:
       //INNITIAL SETUP
+      $("#emergency").css("visibility", "visible");
 	  update_asset_status(event_nr);
 	  replace_instruction(event_);
+      replace_screen(instruction[event_][2]);
 	  if (!(current_asset==innitial_asset)){
-	    replace_asset(innitial_asset);
+	      replace_asset("a"+innitial_asset);
+          current_asset=innitial_asset;
 	  }
-	  replace_screen(instruction[event_][2]);
       break;
 case 11:
 case 12:
@@ -476,27 +484,37 @@ $( document ).ready(function() {
               event_nr=event.event;
               asset_rfid_id=event.asset_rfid_id;
               pimped=event.pimped;
+               //evoid repeating same event
               if(!(current_event==event_nr)){
+                 //if event 2 is not ready with installing the asset
+                  //installed is set to true when asset is intalled - event 2 is ready
                  if (installed==false){
-                 if (!(event_nr==next_event.nr)){
-                   if(event_nr==9 || event_nr==1 || event_nr==0){
-                 console.log("saving");
-                 console.log(event_nr);
-                 current_event=event_nr;
-                 //next_event={};
-                 next_event.nr=event_nr;
-                 next_event.asset=asset_rfid_id;
-                 next_event.pimp=pimped;
-                 }else if (event_nr==2){
-                 next_event=null;
-                 }
-                 
+                   //backing up incoming events during the installation for the later execution
+                   if((event_nr==9 || event_nr==1 || event_nr==0 || event_nr==3 || event_nr==10 || event_nr==14)){
+                      console.log("saving");
+                      console.log(event_nr);
+                      current_event=event_nr;
+                      backup_event={nr:event_nr, asset:asset_rfid_id, pimp:pimped};
+
+                       //backing up event 2 only if the asset is changed during the installation
+                       }else if (event_nr==2||event_nr==5){
+                       if (asset_rfid_id==current_asset) {
+                           console.log("setting backup to null");
+                           backup_event={nr:null, asset:null, pimp:null};
+
+                       }else{
+                           //if the asset is changed during the installation of another asset
+                           console.log("saving");
+                           console.log(event_nr);
+                           current_event=event_nr;
+                           backup_event={nr:event_nr, asset:asset_rfid_id, pimp:pimped};
+                       }
                  }
                  } else{
                  console.log("not saving");
-                 reset_all_texts(event_nr, asset_rfid_id, pimped);
                  console.log(event_nr);
                  current_event=event_nr;
+                 reset_all_texts(event_nr, asset_rfid_id, pimped);
                  }
                  
              } 
@@ -543,11 +561,11 @@ $("#button_next").click(function(evt) {
           //var image = new Image();
           //image.src = "/asset_installed/";
            installed=true;
-    
-          $("#button_previous").css("visibility", "hidden");
-          $("#button_next").css("visibility", "hidden");
-          reset_all_texts(next_event.nr, next_event.asset, next_event.pimp);
-          current_event=next_event.nr;
+            $("#button_previous").css("visibility", "hidden");
+            $("#button_next").css("visibility", "hidden");
+            $("#emergency").css("visibility", "hidden");
+          reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
+          current_event=backup_event.nr;
          }else{
            install_pump_e1("event2");
               }
@@ -564,6 +582,14 @@ $("#button_previous").click(function(evt) {
          }
         install_pump("event2",current_asset);
         }
+     });
+
+$("#emergency").click(function(evt) {
+       console.log("Emergency mode");
+       var image = new Image();
+       image.src = "/emergency/";
+
+
      });
 
 

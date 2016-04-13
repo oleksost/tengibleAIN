@@ -16,13 +16,14 @@ EVENTS
  #10 - remind to boost the asset
  #11 - remind to remove the service car form the manufacturer's facilities
  #12 - thanks for removing the car
+ #14 - please put the bulletin to the manufacturer for the first time activation
 */
 
  
 
 // Asset Arrays [ID, MODEL, IMAGEFILE, IMAGEFILE-pimped, MODEL-pimped], RFID as identifier: e.g. a215 has RFID id 215//
  assets = {};
- assets.a000 = ["...", "...", ["static/img/asset0.gif",""],[]];
+ assets.a000 = ["...", "...", ["static/img/asset0.gif",""],["","","","","static/img/screenshot6.jpg"]];
  assets.a215 = ["123456-1", "Gas Turbine", ["static/img/asset1.gif", "static/img/asset1x.gif"],"123456-11",["static/img/screenshot2-1.jpg","static/img/screenshot3-1.jpg","static/img/screenshot4.jpg","static/img/screenshot5-1.jpg", "static/img/screenshot6.jpg"]];	
  assets.a133 = ["123457-1", "Air Compressor", ["static/img/asset2.gif","static/img/asset2x.gif"], "123457-2",["static/img/screenshot2-2.jpg","static/img/screenshot3-3.jpg","static/img/screenshot4.jpg","static/img/screenshot5-2.jpg","static/img/screenshot6.jpg"]];
  assets.a209 = ["123458-1", "Seawater Pump", ["static/img/asset3.gif","static/img/asset3x.gif"], "123458-2",["static/img/screenshot2-3.jpg","static/img/screenshot3-2.jpg","static/img/screenshot4.jpg","static/img/screenshot5-3.jpg","static/img/screenshot6.jpg"]];
@@ -38,7 +39,7 @@ EVENTS
  marketing.event2.e1=["New Asset Installation", "Sharing non critical usage data between operators and manufacturers offers entirely new business models, such as performance as a service, proactive spare parts etc.. For the operator it guarantees best possible service and maintenance and improves asset profitability."];
  //marketing.event2.e2=["New Asset Installation", "Synching usage data between operators and manufacturers offers entirely new business models, such as Asset as a Service, on the manufacturer side. For the operator it guarantees best possible service and maintenance before assets break."];
  marketing.event9 = ["New Asset Installation","Asset Installation information helps the manufacturer to retrieve operational data for benchmarks, possible product improvements and additional proactive tailored services."];
-
+ marketing.event14 = ["New Asset Installation","Asset Installation information helps the manufacturer to retrieve operational data for benchmarks, possible product improvements and additional proactive tailored services."];
  marketing.event3 = ["Error Handling", "Errors can be quickly detected and fixed before assets break. Connected third party or in-house service providers receive all necessary information such as required spare parts, maintenance and safety instructions before they set off for a one-stop service. As they can access this via their mobile devices right at the asset it saves time, money and nerves."];
  marketing.event4 = ["Service Bulletins","Updated product, maintenance or service instructions can be quickly shared within the network. AIN helps to avoid duplicates and local copies of outdated information. This keeps all processes simple and lean."];
  marketing.event5 = ["Error Handling", "Errors can be quickly detected and fixed before assets break. Connected third party or in-house service providers receive all necessary information such as required spare parts, maintenance and safety instructions before they set off for a one-stop service. As they can access this via their mobile devices right at the asset it saves time, money and nerves."];
@@ -67,12 +68,13 @@ instruction.event2.e1 =["Nice ", "! I’ll finish the configuration and save the
 instruction.event3 = ["Drive my truck onto the operator’s site to fix this!",speaker.service, "screenshot6"];
 instruction.event9 = ["Based on your machine usage I just improved the service agreement. Please install the update when you are ready.",speaker.manufacturer, "screenshot3"];
 instruction.event4 = ["Cool! You are a great help. Finally I do not have to search in every supplier portal for the latest information.", speaker.operator, "screenshot4"];
-instruction.event5 = ["Thanks, this was a successful first visit fix. The truck may now leave my site.",speaker.operator];
+instruction.event5 = ["Thanks, this was a successful first visit fix. The truck may now leave my site.",speaker.operator, "screenshot3"];
 instruction.event6 = ["Thanks, the new component increased the performance by 23%!",speaker.operator,"screenshot5"];
 instruction.event7 = ["Sorry to hear, you didn’t like it. Can do something else for you?",speaker.service,"screenshot5"]; 
 instruction.event10 = ["For this functional location I would recommend a better motor. Install my 15 kW motor  to improve the performance.",speaker.service, "screenshot4"];
 instruction.event11 = ["Hey, would you mind putting my truck back to the service garage?", speaker.service, "screenshot4"];
-instruction.event12 = ["Thank you!", speaker.service, new Image().src="static/img/screenshot4.jpg"];
+instruction.event12 = ["Thank you!", speaker.service, "screenshot4"];
+instruction.event14 = ["Would you mind placing the service bulletin onto my site so that I can prepare the service agreements.", speaker.manufacturer, "screenshot4"];
 //instruction.event13 = ["Please remove the service pack.", speaker.service, new Image().src="static/img/screenshot4.jpg"];
 
 /*
