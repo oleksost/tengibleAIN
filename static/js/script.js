@@ -18,7 +18,7 @@ EVENTS
 */
 
 var paused=false;
-var backup_event={};
+var backup_event={nr:null,asset:null,pimp:null};
 var timeout;
 var timeout_e1=null;
 var installed=true;
@@ -28,6 +28,9 @@ var current_event;
 var last_image="screenshot1";
 var current_speaker;
 var last_animation_ready=true;
+var event_sequence_for_emergency=[2,9,4,10,6,3,5,11,12,7];
+var current_emergency_event_index=0;
+var emergency_mode_event_2=false;
 
 /*
 function wait(ms){
@@ -248,10 +251,12 @@ if (!(last_image==src)){
 //TODO_: implement this function in a loop
 function install_pump(event_,asset_rfid_id, pimped){
      timeout_e1=null;
-     $("#button_next").css("visibility","visible");
-     $("#button_previous").css("visibility","hidden");
+     if (!(current_event==15)) {
+        $("#button_next").css("visibility", "visible");
+        $("#button_previous").css("visibility", "hidden");
+     }
      var asset_ = "a"+asset_rfid_id.toString();
-     console.log("setting current_assets"+pimped);
+     console.log("setting current_assets "+pimped);
      //current_asset=asset_rfid_id;
 	 replace_asset(asset_, pimped);   
      replace_marketing(event_,"e0");
@@ -277,17 +282,17 @@ function install_pump_e1(event_){
     //var image = new Image();
     //image.src = "/asset_installed/";
     installed=true;
-        $("#button_previous").css("visibility", "hidden");
-        $("#button_next").css("visibility", "hidden");
+        if (!(current_event==15)) {
+            $("#button_previous").css("visibility", "hidden");
+            $("#button_next").css("visibility", "hidden");
+        }
+        emergency_mode_event_2=false;
         $("#emergency").css("visibility", "hidden");
-    try{
-    //might throw a TypeError if esset is removed and put back on the RFID Reader  during the installation process 
-    reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
-    }
-    catch (e) {}
-    finally{
-     current_event=nextinstalled=true;
-           }
+       if (!(backup_event.nr==null)) {
+           reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
+           current_event = backup_event.nr;
+       }
+
     }, 10000);
     
     
@@ -348,8 +353,11 @@ case 2:
      installed=false;
      current_asset=asset_rfid_id;
      install_pump(event_, asset_rfid_id, pimped);
-     
+     if (current_event==15) {
+         emergency_mode_event_2 = true;
+     }
      break;
+
 case 10:
      replace_instruction(event_);
      break;
@@ -416,14 +424,21 @@ case 12:
       replace_instruction(event_);
 	  //update_asset_status(event_nr);
 	  break;
+case 15:
+      console.log("event 15");
+      $("#button_previous").css("visibility", "visible");
+      $("#button_next").css("visibility", "visible");
+
+	  //update_asset_status(event_nr);
+	  break;
 
 default:
     replace_marketing(event_);
 	replace_instruction(event_);
 	update_asset_status(event_nr);
-	replace_screen(instruction[event_][2]);  
-    
-} 
+	replace_screen(instruction[event_][2]);
+
+}
 console.log("all texts reset");
 }
 
@@ -490,7 +505,7 @@ $( document ).ready(function() {
                   //installed is set to true when asset is intalled - event 2 is ready
                  if (installed==false){
                    //backing up incoming events during the installation for the later execution
-                   if((event_nr==9 || event_nr==1 || event_nr==0 || event_nr==3 || event_nr==10 || event_nr==14)){
+                   if((event_nr==9 || event_nr==1 || event_nr==0 || event_nr==3 || event_nr==10 || event_nr==14||event_nr==15)){
                       console.log("saving");
                       console.log(event_nr);
                       current_event=event_nr;
@@ -511,10 +526,11 @@ $( document ).ready(function() {
                        }
                  }
                  } else{
-                 console.log("not saving");
-                 console.log(event_nr);
-                 current_event=event_nr;
-                 reset_all_texts(event_nr, asset_rfid_id, pimped);
+                     console.log("not saving");
+                     console.log(event_nr);
+                     console.log(asset_rfid_id);
+                     current_event=event_nr;
+                     reset_all_texts(event_nr, asset_rfid_id,false);
                  }
                  
              } 
@@ -551,7 +567,7 @@ $("#button_reset").click(function(evt) {
      });
   
 $("#button_next").click(function(evt) {
-        if(current_event==2){
+        if(current_event==2 || (emergency_mode_event_2==true && current_event==15)){
         console.log("clearing");
         //paused=true;
         clearTimeout(timeout);
@@ -561,33 +577,76 @@ $("#button_next").click(function(evt) {
           //var image = new Image();
           //image.src = "/asset_installed/";
            installed=true;
-            $("#button_previous").css("visibility", "hidden");
-            $("#button_next").css("visibility", "hidden");
-            $("#emergency").css("visibility", "hidden");
-          reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
-          current_event=backup_event.nr;
+            if (!(current_event==15)) {
+                $("#button_previous").css("visibility", "hidden");
+                $("#button_next").css("visibility", "hidden");
+                $("#emergency").css("visibility", "hidden");
+
+            }else
+            {
+                 emergency_mode_event_2 = false;
+                 reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215);
+                 current_emergency_event_index = current_emergency_event_index+1;
+            }
+          if (!(backup_event.nr==null)) {
+              reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
+              current_event = backup_event.nr;
+          }
          }else{
            install_pump_e1("event2");
               }
         }
+    else if (current_event==15 && emergency_mode_event_2==false) {
+          if (current_emergency_event_index<event_sequence_for_emergency.length) {
+              console.log(current_emergency_event_index);
+              current_emergency_event_index = current_emergency_event_index+1;
+              reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215);
+              if (current_emergency_event_index==event_sequence_for_emergency.length-1){
+                   //last event
+                   $("#button_next").css("visibility", "hidden");
+              }
+
+          }else{
+              $("#button_next").css("visibility", "hidden");
+          }
+
+        }
      });
 
 $("#button_previous").click(function(evt) {
-
-       if(current_event==2){
+       if(current_event==2 || (emergency_mode_event_2==true && current_event==15)){
         console.log("clearing");
         if(!(timeout_e1==null)){
           clearTimeout(timeout_e1);
           timeout_e1==null;
          }
-        install_pump("event2",current_asset);
+           install_pump("event2",current_asset);
+           $("#button_previous").css("visibility", "hidden");
         }
+    else if (current_event==15 && emergency_mode_event_2==false){
+          if (!(current_emergency_event_index<=0)){
+              current_emergency_event_index = current_emergency_event_index - 1;
+              if (current_emergency_event_index==0){
+                  $("#button_previous").css("visibility", "hidden");
+              }
+              console.log("Step back "+current_emergency_event_index);
+              reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215);
+              //put back the "button_next" if there are next events
+              if (current_emergency_event_index<event_sequence_for_emergency.length && $(button_next).css("visibility")=="hidden" ){
+                   $("#button_next").css("visibility", "visible");
+              }
+
+          }else{
+              $("#button_previous").css("visibility", "hidden");
+          }
+       }
      });
 
 $("#emergency").click(function(evt) {
        console.log("Emergency mode");
        var image = new Image();
        image.src = "/emergency/";
+       $("#emergency").css("visibility", "hidden");
 
 
      });

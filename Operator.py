@@ -35,10 +35,8 @@ class Operator(Participant):
           
      def buy_asset(self, manufacturer, main_queue, BREAK_ASSET_MANUALY_GPIO, service, GPIO_to_repair_for_demo):
         #global EMERGENCY
-        if __builtin__.EMERGENCY:
-            self.Asset=Operator.emergancy_asset(GPIO_to_repair_for_demo)
-        else:
-            self.Asset=Operator.readRFID(service, self,manufacturer.Catalog, main_queue, manufacturer, BREAK_ASSET_MANUALY_GPIO, main_queue, GPIO_to_repair_for_demo)
+        self.Asset=Operator.readRFID(service, self,manufacturer.Catalog, main_queue, manufacturer, BREAK_ASSET_MANUALY_GPIO, main_queue, GPIO_to_repair_for_demo)
+        print "bought "+str(self.Asset.RFID_Identifier)
         print str(manufacturer.Bulletin_at_manufacturers_campus)
         self.Asset_is_working=True
         self.Asset_not_on_RFID=0
@@ -96,7 +94,7 @@ class Operator(Participant):
         while True and main_queue.empty():
          #Demonstrate the asset break even if there is no asset
          #print broken_asset_security
-         if not broken:
+         if not broken and __builtin__.operator_connected:
            print broken_asset_security
            if GPIO.input(BREAK_ASSET_MANUALY_GPIO) == 0:
                     broken_asset_security = broken_asset_security + 1
@@ -115,9 +113,15 @@ class Operator(Participant):
                switch_to_event_0=datetime.datetime.now()+datetime.timedelta(seconds=10)
                event_updated=False
 
-         if __builtin__.EMERGENCY:
+         if __builtin__.EMERGENCY and __builtin__.operator_connected:
+            print "Emergency Buy"
             Asset=Operator.emergancy_asset(GPIO_to_repair_for_demo)
             operator.Has_asset=True
+            break
+            break
+
+         if __builtin__.EMERGENCY and not __builtin__.operator_connected:
+            Participant.update_event(15)
             break
             break
 

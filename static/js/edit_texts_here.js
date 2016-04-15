@@ -74,7 +74,7 @@ instruction.event7 = ["Sorry to hear, you didn’t like it. Can do something els
 instruction.event10 = ["For this functional location I would recommend a better motor. Install my 15 kW motor  to improve the performance.",speaker.service, "screenshot4"];
 instruction.event11 = ["Hey, would you mind putting my truck back to the service garage?", speaker.service, "screenshot4"];
 instruction.event12 = ["Thank you!", speaker.service, "screenshot4"];
-instruction.event14 = ["Would you mind placing the service bulletin onto my site so that I can prepare the service agreements.", speaker.manufacturer, "screenshot4"];
+instruction.event14 = ["Please put the service bulletin back into my factory so that I can prepare the service agreements.", speaker.manufacturer, "screenshot4"];
 //instruction.event13 = ["Please remove the service pack.", speaker.service, new Image().src="static/img/screenshot4.jpg"];
 
 /*
