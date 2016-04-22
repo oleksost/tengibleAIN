@@ -2,20 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ef4511f7-bd57-4c3d-b700-cf2098c42d5d" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/img/asset0.gif" afterPath="$PROJECT_DIR$/static/img/asset0.gif" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/img/background.jpg" afterPath="$PROJECT_DIR$/static/img/background.jpg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/img/minifigure1.png" afterPath="$PROJECT_DIR$/static/img/minifigure1.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/img/minifigure2.png" afterPath="$PROJECT_DIR$/static/img/minifigure2.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/img/minifigure3.png" afterPath="$PROJECT_DIR$/static/img/minifigure3.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/img/screenshot1.jpg" afterPath="$PROJECT_DIR$/static/img/screenshot1.jpg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Main.py" afterPath="$PROJECT_DIR$/Main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Operator.py" afterPath="$PROJECT_DIR$/Operator.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Participant.py" afterPath="$PROJECT_DIR$/Participant.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Service.py" afterPath="$PROJECT_DIR$/Service.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/css/styles.css" afterPath="$PROJECT_DIR$/static/css/styles.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/js/edit_texts_here.js" afterPath="$PROJECT_DIR$/static/js/edit_texts_here.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/js/script.js" afterPath="$PROJECT_DIR$/static/js/script.js" />
     </list>
     <ignored path="AIN.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -77,8 +64,8 @@
       <file leaf-file-name="Main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.13953489">
-              <caret line="18" column="77" selection-start-line="18" selection-start-column="77" selection-end-line="18" selection-end-column="77" />
+            <state vertical-scroll-proportion="0.069767445">
+              <caret line="18" column="4" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
               <folding>
                 <element signature="e#18#27#0" expanded="true" />
               </folding>
@@ -1041,8 +1028,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13953489">
-          <caret line="18" column="77" selection-start-line="18" selection-start-column="77" selection-end-line="18" selection-end-column="77" />
+        <state vertical-scroll-proportion="0.069767445">
+          <caret line="18" column="4" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
           <folding>
             <element signature="e#18#27#0" expanded="true" />
           </folding>

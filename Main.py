@@ -16,8 +16,7 @@ import RPi.GPIO as GPIO
 from multiprocessing import Process, Queue
 import signal
 
-#DESIGNED AND DEVELOPED BY THOMAS SCHÖRNER AND OLEKSIY OSTAPENKO FOR SAP 2016
-"""
+""" 
  EVENTS:
  #0 - initial setup
  #1 - no asset on rfid
