@@ -17,7 +17,7 @@
 
 
 html{
-	background-image: url("../img/background.jpg");
+	background-image: url("../img/background.jpeg");
 	background-size: cover;
 	background-repeat: no-repeat;
 	min-height: 980px;
@@ -79,6 +79,10 @@ div, img{
 	border: none;
 	cursor: pointer;
 }
+#emergency{
+	/*not visible at the beggining*/
+	visibility: hidden;
+}
 
 .icon_button{
 	padding: 0.5rem;
@@ -116,45 +120,44 @@ visibility:hidden;
 
 #button_reset{
 }
-
-
-
 /* ------ SCREENS -------- */
 
 
 #container_iframe{
-	width: 60%;
-	height: 92%;
-	min-height: 93%;
-	text-align: center;
-	float: left;
-	position:relative;
+width: 60%;
+height: 92%;
+min-height: 93%;
+text-align: center;
+float: left;
+position:relative;
+
+
 }
 
 /* If an iframe is used to display the real solution */
 #container_iframe iframe{
-	width: 100%;
-	height: 100%;
-	border: 3px solid #758c9b;
+width: 100%;
+height: 100%;
+border: 3px solid #758c9b;
 
 }
 
 /* If screenshots are displayed instead of an iframe */
 #container_iframe img{
-	height: 100%;
-	width: auto;
-	border: 3px solid #758c9b;
-	/*TO MAKE IMAGES OVERLAP*/
-	position: absolute;
-	/*POSITION CENTER*/
-	margin-left: auto;
+max-width: 100%;
+max-height: 100%;
+border: 3px solid #758c9b;
+/*TO MAKE IMAGES OVERLAP*/
+position: absolute;
+/*POSITION CENTER*/
+margin-left: auto;
     margin-right: auto;
     left: 0;
     right: 0;
+    object-fit: contain;
+    object-position: 50% 0%;
 
 }
-
-
 
 /* ------ SIDEPANEL -------- */
 /* ------ SIDEPANEL -------- */

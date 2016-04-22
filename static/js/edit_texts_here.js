@@ -28,7 +28,6 @@ EVENTS
  assets.a133 = ["123457-1", "Air Compressor", ["static/img/asset2.gif","static/img/asset2x.gif"], "123457-2",["static/img/screenshot2-2.jpg","static/img/screenshot3-3.jpg","static/img/screenshot4.jpg","static/img/screenshot5-2.jpg","static/img/screenshot6.jpg"]];
  assets.a209 = ["123458-1", "Seawater Pump", ["static/img/asset3.gif","static/img/asset3x.gif"], "123458-2",["static/img/screenshot2-3.jpg","static/img/screenshot3-2.jpg","static/img/screenshot4.jpg","static/img/screenshot5-3.jpg","static/img/screenshot6.jpg"]];
 
-
 // Marketing Arrays [HEADLINE, TEXT] //
  marketing = {};  
  //initial marketing
@@ -50,9 +49,9 @@ EVENTS
  
 // Speaker arrays [Name, Mini-figure image name] //
 speaker = {};
-speaker.manufacturer=["Manufacturer", new Image().src="static/img/minifigure1.png"];
-speaker.operator=["Operator", new Image().src="static/img/minifigure3.png"];
-speaker.service=["Service provider", new Image().src="static/img/minifigure2.png"];
+speaker.manufacturer=["Manufacturer", "minifigure1"];
+speaker.operator=["Operator", "minifigure3"];
+speaker.service=["Service provider", "minifigure2"];
 
 // Instruction arrays [Text] //
 instruction = {};
@@ -70,8 +69,8 @@ instruction.event9 = ["Based on your machine usage I just improved the service a
 instruction.event4 = ["Cool! You are a great help. Finally I do not have to search in every supplier portal for the latest information.", speaker.operator, "screenshot4"];
 instruction.event5 = ["Thanks, this was a successful first visit fix. The truck may now leave my site.",speaker.operator, "screenshot3"];
 instruction.event6 = ["Thanks, the new component increased the performance by 23%!",speaker.operator,"screenshot5"];
-instruction.event7 = ["Sorry to hear, you didn’t like it. Can do something else for you?",speaker.service,"screenshot5"]; 
-instruction.event10 = ["For this functional location I would recommend a better motor. Install my 15 kW motor  to improve the performance.",speaker.service, "screenshot4"];
+instruction.event7 = ["Sorry to hear, you didn’t like it. Can I do something else for you?",speaker.service,"screenshot5"];
+instruction.event10 = ["For this functional location I would recommend a better motor. Please, place my new component next to the asset.",speaker.service, "screenshot4"];
 instruction.event11 = ["Hey, would you mind putting my truck back to the service garage?", speaker.service, "screenshot4"];
 instruction.event12 = ["Thank you!", speaker.service, "screenshot4"];
 instruction.event14 = ["Please put the service bulletin back into my factory so that I can prepare the service agreements.", speaker.manufacturer, "screenshot4"];

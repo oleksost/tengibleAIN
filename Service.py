@@ -9,7 +9,7 @@ class Service(Participant):
      def repare_Asset(self, operator, service, manufacturer):
          if not operator.Asset is None:
            operator.Asset.Broken=False
-           #operator.Asset.set_next_break()
+           operator.Asset.set_next_break()
            operator.Asset_is_working=True
          Participant.stop_blinking(service.Blinker_queue)
          Participant.stop_blinking(operator.Blinker_queue)

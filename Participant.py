@@ -77,7 +77,7 @@ class Participant(object):
         @staticmethod
         def blink_bulletin(out, frequenz, main_queue):
             blinker_queue=Queue()
-            pr=Process(target=Participant.activate_actor, args=(out,blinker_queue,frequenz, main_queue))
+            pr=Process(target=Participant.activate_bulletin, args=(out,blinker_queue,frequenz, main_queue))
             pr.daemon = True
             pr.start()
             return blinker_queue
@@ -86,6 +86,20 @@ class Participant(object):
         def stop_blinking(participant_queue):
             if not participant_queue is None:
               participant_queue.put("Stop")
+
+        @staticmethod
+        def activate_bulletin(gpio, queue, frequenz, main_queue):
+            while queue.empty() and main_queue.empty():
+              # LED an
+              GPIO.output(gpio, GPIO.HIGH)
+              # Warte 100 ms
+              time.sleep(frequenz)
+              # LED aus
+              if queue.empty():
+               GPIO.output(gpio, GPIO.LOW)
+              # Warte 100 ms
+              time.sleep(frequenz)
+
 
 
         @staticmethod

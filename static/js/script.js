@@ -31,6 +31,7 @@ var last_animation_ready=true;
 var event_sequence_for_emergency=[2,9,4,10,6,3,5,11,12,7];
 var current_emergency_event_index=0;
 var emergency_mode_event_2=false;
+var emergency_mode_flow_control_klicked_next;
 
 /*
 function wait(ms){
@@ -171,7 +172,8 @@ function replace_minifigure(event_, speaker){
        // Animation complete -> Replace image
 
            //EVENT2 HAS SUBEVENTS
-           $( "#minifigure_image" ).attr('src', speaker);
+           var src = $('#'+speaker).attr('src');
+           $( "#minifigure_image" ).attr('src', src);
            // fade in minifigure
            $( "#minifigure_image" ).animate({
            opacity: 1,
@@ -288,7 +290,7 @@ function install_pump_e1(event_){
         }
         emergency_mode_event_2=false;
         $("#emergency").css("visibility", "hidden");
-       if (!(backup_event.nr==null)) {
+        if (!(backup_event.nr==null)) {
            reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
            current_event = backup_event.nr;
        }
@@ -351,6 +353,7 @@ case 8:
      break;
 case 2:
      installed=false;
+    console.log("event 2 "+asset_rfid_id);
      current_asset=asset_rfid_id;
      install_pump(event_, asset_rfid_id, pimped);
      if (current_event==15) {
@@ -365,6 +368,7 @@ case 10:
 case 6:
     var asset_ = "a"+asset_rfid_id.toString();
     //$("#asset_image").one("load", function() {
+        console.log("else "+event_)
         replace_asset(asset_, true);
         replace_marketing(event_);
 	    replace_instruction(event_);
@@ -407,7 +411,7 @@ case 1:
 	  replace_instruction(event_);
 	  console.log(instruction[event_][2]);
       break;
-case 0:
+    case 0:
       //INNITIAL SETUP
       $("#emergency").css("visibility", "visible");
 	  update_asset_status(event_nr);
@@ -426,13 +430,13 @@ case 12:
 	  break;
 case 15:
       console.log("event 15");
-      $("#button_previous").css("visibility", "visible");
+      //$("#button_previous").css("visibility", "visible");
       $("#button_next").css("visibility", "visible");
 
 	  //update_asset_status(event_nr);
 	  break;
 
-default:
+    default:
     replace_marketing(event_);
 	replace_instruction(event_);
 	update_asset_status(event_nr);
@@ -471,6 +475,9 @@ function preload(arrayOfImages, asset) {
       $('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+2)+asset).appendTo('#container_iframe').css('visibility','hidden');
    }
 }
+function preload_minifigures(Image) {
+      $('<img />').attr('src',"static/img/"+Image+".png").attr('id',Image).appendTo('#container_preload').css('visibility','hidden');
+}
 function preload_pumps(arrayOfImages, asset) {
       //$('<img />').attr('src',arrayOfImages[index]).attr('id',"screenshot"+(index+1)).appendTo('#container_iframe').css('visibility','hidden');
       $('<img />').attr('src',arrayOfImages[0]).attr('id',asset).appendTo('#container_preload');
@@ -482,15 +489,19 @@ function preload_pumps(arrayOfImages, asset) {
 $( document ).ready(function() {
 	console.log("document loaded");
 	screen_mode("screenshot");
-	for(var asset in assets) 
+	for(var asset in assets)
 	   {
           preload(assets[asset][assets[asset].length-1],asset);
           preload_pumps(assets[asset][2],asset);
        }
+    for(var minifigure in speaker)
+	   {
+         preload_minifigures(speaker[minifigure][speaker[minifigure].length-1]);
+       }
 	
 	if ("WebSocket" in window){
-           var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
-           //var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
+           //var ws = new WebSocket("ws://192.168.2.2:5000/websocket");
+           var ws = new WebSocket("ws://0.0.0.0:5000/websocket");
            var messagecount = 0;
            start_demo();
            ws.onmessage = function(evt) {
@@ -505,14 +516,22 @@ $( document ).ready(function() {
                   //installed is set to true when asset is intalled - event 2 is ready
                  if (installed==false){
                    //backing up incoming events during the installation for the later execution
-                   if((event_nr==9 || event_nr==1 || event_nr==0 || event_nr==3 || event_nr==10 || event_nr==14||event_nr==15)){
-                      console.log("saving");
-                      console.log(event_nr);
-                      current_event=event_nr;
-                      backup_event={nr:event_nr, asset:asset_rfid_id, pimp:pimped};
+                   if((event_nr==9 || event_nr==3 || event_nr==10 || event_nr==14||event_nr==15||event_nr==7)) {
+                       console.log("saving");
+                       console.log(event_nr);
+                       current_event = event_nr;
+                       backup_event = {nr: event_nr, asset: asset_rfid_id, pimp: pimped};
+                   }else if ( event_nr==1 || event_nr==0) {
+                       clearTimeout(timeout);
+                       clearTimeout(timeout_e1);
+                       installed = true;
+                       current_event = event_nr;
+                       reset_all_texts(event_nr, asset_rfid_id, pimped);
 
-                       //backing up event 2 only if the asset is changed during the installation
-                       }else if (event_nr==2||event_nr==5){
+
+                   }
+                       //if asset is broken during the installation and than repaired during the installation, the repair event should not be saved
+                   else if (event_nr==5){
                        if (asset_rfid_id==current_asset) {
                            console.log("setting backup to null");
                            backup_event={nr:null, asset:null, pimp:null};
@@ -530,7 +549,7 @@ $( document ).ready(function() {
                      console.log(event_nr);
                      console.log(asset_rfid_id);
                      current_event=event_nr;
-                     reset_all_texts(event_nr, asset_rfid_id,false);
+                     reset_all_texts(event_nr, asset_rfid_id, pimped);
                  }
                  
              } 
@@ -585,8 +604,9 @@ $("#button_next").click(function(evt) {
             }else
             {
                  emergency_mode_event_2 = false;
-                 reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215);
+                 reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215, false);
                  current_emergency_event_index = current_emergency_event_index+1;
+                 emergency_mode_flow_control_klicked_next=true;
             }
           if (!(backup_event.nr==null)) {
               reset_all_texts(backup_event.nr, backup_event.asset, backup_event.pimp);
@@ -599,8 +619,9 @@ $("#button_next").click(function(evt) {
     else if (current_event==15 && emergency_mode_event_2==false) {
           if (current_emergency_event_index<event_sequence_for_emergency.length) {
               console.log(current_emergency_event_index);
+              reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215, false);
               current_emergency_event_index = current_emergency_event_index+1;
-              reset_all_texts(event_sequence_for_emergency[current_emergency_event_index], 215);
+              emergency_mode_flow_control_klicked_next=true;
               if (current_emergency_event_index==event_sequence_for_emergency.length-1){
                    //last event
                    $("#button_next").css("visibility", "hidden");
@@ -626,6 +647,10 @@ $("#button_previous").click(function(evt) {
     else if (current_event==15 && emergency_mode_event_2==false){
           if (!(current_emergency_event_index<=0)){
               current_emergency_event_index = current_emergency_event_index - 1;
+              if (emergency_mode_flow_control_klicked_next==true){
+                  current_emergency_event_index = current_emergency_event_index - 1;
+              }
+              emergency_mode_flow_control_klicked_next=false;
               if (current_emergency_event_index==0){
                   $("#button_previous").css("visibility", "hidden");
               }

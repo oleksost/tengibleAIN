@@ -42,6 +42,7 @@ class Operator(Participant):
         self.Asset_not_on_RFID=0
         #check if the asset is already boosted
         if GPIO.input(self.Pimp_GPIO)==0:
+           print "setting pimped"
            self.Asset.Pimped=True
            
         Participant.asset_bought(self.Asset)
@@ -132,8 +133,15 @@ class Operator(Participant):
             GPIO.output(operator.Service_Bulletin_GPIO_out, GPIO.HIGH)
             Participant.update_event(0)
             manufacturer.Bulletin.Activated_for_communication=False
-            operator.User_informed_about_recent_update=False
-            switch_to_event_0=0
+            manufacturer.Bulletin.Agreement_loaded_on_bulletin_by_the_manufacturer = False
+            print "bulletin "+ str(manufacturer.Bulletin.Agreement_loaded_on_bulletin_by_the_manufacturer)
+            if not operator.Asset ==None:
+              operator.Asset.Next_Pimp =0
+            try:
+             manufacturer.Next_asset_update = 0
+            finally:
+             operator.User_informed_about_recent_update=False
+             switch_to_event_0=0
          (error, tag_type) = rdr.request()
          if not error and not broken:
            #print "Tag detected"
